@@ -1,0 +1,7 @@
+numerito x;
+x es 10;
+si_po x igualito 10 {
+    muestra_la_wa x;
+} si_no {
+    muestra_la_wa 0;
+}
