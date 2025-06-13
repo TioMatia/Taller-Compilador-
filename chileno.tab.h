@@ -51,7 +51,13 @@
      PRINT = 267,
      READ = 268,
      ASSIGN = 269,
-     EQ = 270
+     EQ = 270,
+     LT = 271,
+     GT = 272,
+     PLUS = 273,
+     MINUS = 274,
+     MULT = 275,
+     DIV = 276
    };
 #endif
 
@@ -71,7 +77,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 75 "chileno.tab.h"
+#line 81 "chileno.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

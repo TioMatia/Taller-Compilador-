@@ -8,7 +8,7 @@ extern int yylex();
 void yyerror(const char *s) {
     std::cerr << "Error: " << s << std::endl;
 }
-AST* tree; // arbol general
+AST* tree;
 %}
 
 %union {
@@ -22,11 +22,14 @@ AST* tree; // arbol general
 %token <intval> NUMBER
 %token <id> IDENTIFIER
 %token IF ELSE WHILE FOR FUNCTION RETURN
-%token TYPE_INT PRINT READ ASSIGN EQ
+%token TYPE_INT PRINT READ ASSIGN EQ LT GT PLUS MINUS MULT DIV
 
 %type <ast> program statements statement expr
 
 %left EQ
+%left LT GT
+%left PLUS MINUS
+%left MULT DIV
 
 %%
 
@@ -40,7 +43,7 @@ statements:
 ;
 
 statement:
-    TYPE_INT IDENTIFIER ';'           { $$ = nullptr; } // declaración ignorada
+    TYPE_INT IDENTIFIER ';'           { $$ = nullptr; }
   | IDENTIFIER ASSIGN expr ';'        { $$ = make_assign(make_id($1), $3); }
   | PRINT expr ';'                    { $$ = make_print($2); }
   | IF expr '{' statements '}' ELSE '{' statements '}' {
@@ -52,16 +55,21 @@ statement:
 expr:
     NUMBER             { $$ = make_int($1); }
   | IDENTIFIER         { $$ = make_id($1); }
-  | expr EQ expr       { $$ = make_binop(EQ, $1, $3); }
+  | expr PLUS expr     { $$ = make_binop(OP_PLUS, $1, $3); }
+  | expr MINUS expr    { $$ = make_binop(OP_MINUS, $1, $3); }
+  | expr MULT expr     { $$ = make_binop(OP_MULT, $1, $3); }
+  | expr DIV expr      { $$ = make_binop(OP_DIV, $1, $3); }
+  | expr EQ expr       { $$ = make_binop(OP_EQ, $1, $3); }
+  | expr LT expr       { $$ = make_binop(OP_LT, $1, $3); }
+  | expr GT expr       { $$ = make_binop(OP_GT, $1, $3); }
 ;
 
 %%
 
 int main() {
     if (yyparse() == 0 && tree != nullptr) {
-        std::cout << " Arbol de sintaxis generado:\n";
+        std::cout << "Arbol de sintaxis generado:\n";
         print_ast(tree, 0);
     }
     return 0;
 }
-

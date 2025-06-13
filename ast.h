@@ -14,9 +14,19 @@ enum NodeType {
     NODE_SEQ
 };
 
+enum BinOp {
+    OP_PLUS,
+    OP_MINUS,
+    OP_MULT,
+    OP_DIV,
+    OP_EQ,
+    OP_LT,
+    OP_GT
+};
+
 struct AST {
     NodeType type;
-    int op; 
+    int op; // BinOp
 
     union {
         int intval;

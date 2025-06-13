@@ -3,8 +3,6 @@
 #include <cstring>
 #include "ast.h"
 #include "chileno.tab.h"
-
-
 %}
 
 %%
@@ -20,6 +18,12 @@
 "pide_la_wa"           return READ;
 "es"                   return ASSIGN;
 "igualito"             return EQ;
+"menor_que"            return LT;
+"mayor_que"            return GT;
+"+"                    return PLUS;
+"-"                    return MINUS;
+"*"                    return MULT;
+"/"                    return DIV;
 
 [0-9]+                 { yylval.intval = atoi(yytext); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.id = strdup(yytext); return IDENTIFIER; }
