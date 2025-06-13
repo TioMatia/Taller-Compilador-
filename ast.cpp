@@ -52,19 +52,22 @@ AST* make_while(AST* cond, AST* body) {
 AST* make_binop(int op, AST* lhs, AST* rhs) {
     AST* node = new AST;
     node->type = NODE_BINOP;
+    node->op = op; 
     node->data.bin.left = lhs;
     node->data.bin.right = rhs;
-    node->data.intval = op;
     return node;
 }
 
 AST* make_seq(AST* first, AST* second) {
+    if (!first) return second;
+    if (!second) return first;
     AST* node = new AST;
     node->type = NODE_SEQ;
     node->data.seq.first = first;
     node->data.seq.second = second;
     return node;
 }
+
 
 void print_ast(AST* tree, int indent) {
     if (!tree) return;
@@ -102,7 +105,7 @@ void print_ast(AST* tree, int indent) {
             print_ast(tree->data.ctrl.then_branch, indent + 1);
             break;
         case NODE_BINOP:
-            std::cout << "BINOP (" << tree->data.intval << "):\n";
+            std::cout << "BINOP (" << tree->op << "):\n"; 
             print_ast(tree->data.bin.left, indent + 1);
             print_ast(tree->data.bin.right, indent + 1);
             break;

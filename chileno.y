@@ -59,7 +59,7 @@ expr:
 
 int main() {
     if (yyparse() == 0 && tree != nullptr) {
-        std::cout << " Árbol de sintaxis generado:\n";
+        std::cout << " Arbol de sintaxis generado:\n";
         print_ast(tree, 0);
     }
     return 0;

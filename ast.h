@@ -16,6 +16,8 @@ enum NodeType {
 
 struct AST {
     NodeType type;
+    int op; 
+
     union {
         int intval;
         char* id;
