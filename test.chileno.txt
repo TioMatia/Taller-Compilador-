@@ -1,6 +1,4 @@
-numerito x;
-x es 0;
-mientras_la_wa x menor_que 5 {
-    muestra_la_wa x;
-    x es x + 1;
+numerito i;
+pa_cada numerito i es 0; i menor_que 5; i es i + 1 {
+    muestra_la_wa i;
 }

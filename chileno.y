@@ -50,6 +50,14 @@ statement:
         $$ = make_if($2, $4, $8);
     }
   | WHILE expr '{' statements '}'     { $$ = make_while($2, $4); }
+  | FOR TYPE_INT IDENTIFIER ASSIGN expr ';' expr ';' IDENTIFIER ASSIGN expr '{' statements '}' {
+      AST* init = make_assign(make_id($3), $5);
+      AST* cond = $7;
+      AST* update = make_assign(make_id($9), $11);
+      AST* body_with_update = make_seq($13, update);
+      $$ = make_seq(init, make_while(cond, body_with_update));
+  }
+
 ;
 
 expr:
@@ -75,4 +83,3 @@ int main() {
     }
     return 0;
 }
-
