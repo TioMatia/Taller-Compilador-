@@ -11,7 +11,9 @@ enum NodeType {
     NODE_IF,
     NODE_WHILE,
     NODE_BINOP,
-    NODE_SEQ
+    NODE_SEQ,
+    NODE_FUNC_DEF,     
+    NODE_FUNC_CALL    
 };
 
 enum BinOp {
@@ -26,7 +28,7 @@ enum BinOp {
 
 struct AST {
     NodeType type;
-    int op; // BinOp
+    int op; 
 
     union {
         int intval;
@@ -44,6 +46,15 @@ struct AST {
             AST* first;
             AST* second;
         } seq;
+        struct {
+            char* name;
+            AST* body;
+        } func_def;
+
+        struct {
+            char* name;
+        } func_call;
+
     } data;
 };
 
@@ -55,6 +66,8 @@ AST* make_if(AST* cond, AST* then_b, AST* else_b);
 AST* make_while(AST* cond, AST* body);
 AST* make_binop(int op, AST* lhs, AST* rhs);
 AST* make_seq(AST* first, AST* second);
+AST* make_func_def(const char* name, AST* body);
+AST* make_func_call(const char* name);
 void print_ast(AST* tree, int indent);
 int eval_ast(AST* tree);
 

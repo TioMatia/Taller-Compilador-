@@ -1,4 +1,5 @@
-numerito i;
-pa_cada numerito i es 0; i menor_que 5; i es i + 1 {
-    muestra_la_wa i;
+pega saludo {
+    muestra_la_wa 123;
 }
+
+saludo();

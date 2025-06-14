@@ -5,6 +5,7 @@
 #include <string>
 
 std::map<std::string, int> variables;
+static std::map<std::string, AST*> funciones; // tabla de funciones
 
 AST* make_int(int val) {
     AST* node = new AST;
@@ -72,6 +73,21 @@ AST* make_seq(AST* first, AST* second) {
     return node;
 }
 
+AST* make_func_def(const char* name, AST* body) {
+    AST* node = new AST;
+    node->type = NODE_FUNC_DEF;
+    node->data.func_def.name = strdup(name);
+    node->data.func_def.body = body;
+    return node;
+}
+
+AST* make_func_call(const char* name) {
+    AST* node = new AST;
+    node->type = NODE_FUNC_CALL;
+    node->data.func_call.name = strdup(name);
+    return node;
+}
+
 void print_ast(AST* tree, int indent) {
     if (!tree) return;
     for (int i = 0; i < indent; ++i) std::cout << "  ";
@@ -128,8 +144,16 @@ void print_ast(AST* tree, int indent) {
             print_ast(tree->data.seq.first, indent + 1);
             print_ast(tree->data.seq.second, indent + 1);
             break;
+        case NODE_FUNC_DEF:
+            std::cout << "FUNC_DEF: " << tree->data.func_def.name << "\n";
+            print_ast(tree->data.func_def.body, indent + 1);
+            break;
+        case NODE_FUNC_CALL:
+            std::cout << "FUNC_CALL: " << tree->data.func_call.name << std::endl;
+            break;
     }
 }
+
 int eval_ast(AST* tree) {
     if (!tree) return 0;
 
@@ -185,8 +209,20 @@ int eval_ast(AST* tree) {
         case NODE_SEQ:
             eval_ast(tree->data.seq.first);
             return eval_ast(tree->data.seq.second);
+
+        case NODE_FUNC_DEF:
+            // Guardar función en tabla
+            funciones[tree->data.func_def.name] = tree->data.func_def.body;
+            return 0;
+
+        case NODE_FUNC_CALL:
+            if (funciones.count(tree->data.func_call.name)) {
+                return eval_ast(funciones[tree->data.func_call.name]);
+            } else {
+                std::cerr << "Error: función '" << tree->data.func_call.name << "' no definida.\n";
+                return 0;
+            }
     }
 
     return 0;
 }
-

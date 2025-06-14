@@ -24,7 +24,7 @@ AST* tree;
 %token IF ELSE WHILE FOR FUNCTION RETURN
 %token TYPE_INT PRINT READ ASSIGN EQ LT GT PLUS MINUS MULT DIV
 
-%type <ast> program statements statement expr
+%type <ast> program statements statement expr func_def func_call
 
 %left EQ
 %left LT GT
@@ -57,7 +57,20 @@ statement:
       AST* body_with_update = make_seq($13, update);
       $$ = make_seq(init, make_while(cond, body_with_update));
   }
+  | func_def                         { $$ = $1; }
+  | func_call ';'                   { $$ = $1; }
+;
 
+func_def:
+    FUNCTION IDENTIFIER '{' statements '}' {
+        $$ = make_func_def($2, $4);
+    }
+;
+
+func_call:
+    IDENTIFIER '(' ')' {
+        $$ = make_func_call($1);
+    }
 ;
 
 expr:
