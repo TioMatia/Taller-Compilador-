@@ -8,6 +8,19 @@
 std::map<std::string, int> variables;
 static std::map<std::string, std::pair<AST*, std::vector<std::string>>> funciones;
 
+const char* op_to_str(int op) {
+    switch (op) {
+        case OP_PLUS: return "+";
+        case OP_MINUS: return "-";
+        case OP_MULT: return "*";
+        case OP_DIV: return "/";
+        case OP_EQ: return "==";
+        case OP_LT: return "<";
+        case OP_GT: return ">";
+        default: return "UNKNOWN_OP";
+    }
+}
+
 AST* make_int(int val) {
     AST* node = new AST;
     node->type = NODE_INT;
@@ -252,7 +265,7 @@ void print_ast(AST* tree, int indent) {
             break;
 
         case NODE_BINOP:
-            std::cout << "BINOP (" << tree->op << ")\n";
+            std::cout << "BINOP (" << op_to_str(tree->op) << ")\n";
             print_ast(tree->data.bin.left, indent + 1);
             print_ast(tree->data.bin.right, indent + 1);
             break;
