@@ -27,7 +27,7 @@ AST* tree;
 
 %token <intval> NUM
 %token <strval> ID
-%token IF ELSE WHILE PRINT FUNCTION RETURN EQ
+%token IF ELSE WHILE PRINT FUNCTION RETURN EQ FOR
 
 %type <ast> expr stmt stmts program func_def func_call return_stmt
 %type <astlist> arg_list
@@ -51,10 +51,11 @@ stmt
     | IF '(' expr ')' stmt ELSE stmt
                                  { $$ = make_if($3, $5, $7); }
     | WHILE '(' expr ')' stmt    { $$ = make_while($3, $5); }
+    | FOR '(' expr ';' expr ';' expr ')' stmt  
+                                 { $$ = make_for($3, $5, $7, $9); }
     | '{' stmts '}'              { $$ = $2; }
     | func_def                   { $$ = $1; }
     | return_stmt                { $$ = $1; }
-    ;
 
 return_stmt
     : RETURN expr ';'            { $$ = make_return($2); }

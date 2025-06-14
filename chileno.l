@@ -9,6 +9,7 @@
 "si_po"                return IF;
 "si_no"                return ELSE;
 "mientras_la_wa"       return WHILE;
+"pa_cada"              return FOR;
 "imprime_la_wa"        return PRINT;
 "pega"                 return FUNCTION;
 "devuelve_la_wa"       return RETURN;

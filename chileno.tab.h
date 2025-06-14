@@ -60,7 +60,8 @@
      PRINT = 263,
      FUNCTION = 264,
      RETURN = 265,
-     EQ = 266
+     EQ = 266,
+     FOR = 267
    };
 #endif
 
@@ -82,7 +83,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 86 "chileno.tab.h"
+#line 87 "chileno.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

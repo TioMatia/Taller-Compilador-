@@ -11,6 +11,7 @@ enum NodeType {
     NODE_PRINT,
     NODE_IF,
     NODE_WHILE,
+    NODE_FOR,
     NODE_BINOP,
     NODE_SEQ,
     NODE_FUNC_DEF,
@@ -18,6 +19,7 @@ enum NodeType {
     NODE_RETURN,
     NODE_ARGS,
     NODE_PARAMS
+    
 };
 
 enum BinOp {
@@ -76,6 +78,14 @@ struct AST {
         struct {
             AST* expr;
         } ret;
+
+        struct {
+            AST* init;
+            AST* cond;
+            AST* update;
+            AST* body;
+        } for_loop;
+
     } data;
 };
 
@@ -93,6 +103,7 @@ AST* make_func_call(const char* name, AST* args);
 AST* make_args(std::vector<AST*>* values);
 AST* make_params(std::vector<std::string>* names);
 AST* make_return(AST* expr);
+AST* make_for(AST* init, AST* cond, AST* update, AST* body);
 
 
 void print_ast(AST* tree, int indent = 0);

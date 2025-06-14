@@ -55,6 +55,16 @@ AST* make_while(AST* cond, AST* body) {
     return node;
 }
 
+AST* make_for(AST* init, AST* cond, AST* update, AST* body) {
+    AST* node = new AST;
+    node->type = NODE_FOR;
+    node->data.for_loop.init = init;
+    node->data.for_loop.cond = cond;
+    node->data.for_loop.update = update;
+    node->data.for_loop.body = body;
+    return node;
+}
+
 AST* make_binop(int op, AST* lhs, AST* rhs) {
     AST* node = new AST;
     node->type = NODE_BINOP;
@@ -164,6 +174,15 @@ int eval_ast(AST* tree) {
             return 0;
         }
 
+        case NODE_FOR: {
+            eval_ast(tree->data.for_loop.init);
+            while (eval_ast(tree->data.for_loop.cond)) {
+                eval_ast(tree->data.for_loop.body);
+                eval_ast(tree->data.for_loop.update);
+            }
+            return 0;
+        }
+
         case NODE_SEQ:
             eval_ast(tree->data.seq.first);
             return eval_ast(tree->data.seq.second);
@@ -177,7 +196,6 @@ int eval_ast(AST* tree) {
         case NODE_FUNC_CALL: {
             if (funciones.count(tree->data.func_call.name)) {
                 auto [body, param_names] = funciones[tree->data.func_call.name];
-
                 std::map<std::string, int> saved_vars = variables;
 
                 std::vector<AST*>* args = tree->data.func_call.args ? tree->data.func_call.args->data.args.values : new std::vector<AST*>();
@@ -188,9 +206,7 @@ int eval_ast(AST* tree) {
                 }
 
                 int result = eval_ast(body);
-
                 variables = saved_vars;
-
                 return result;
             } else {
                 std::cerr << "Error: función '" << tree->data.func_call.name << "' no definida.\n";
@@ -205,8 +221,6 @@ int eval_ast(AST* tree) {
             return 0;
     }
 }
-
-// Funciones para imprimir el AST
 
 void print_indent(int indent) {
     for (int i = 0; i < indent; ++i) std::cout << "  ";
@@ -255,6 +269,18 @@ void print_ast(AST* tree, int indent) {
             std::cout << "WHILE\n";
             print_ast(tree->data.ctrl.cond, indent + 1);
             print_ast(tree->data.ctrl.then_branch, indent + 1);
+            break;
+
+        case NODE_FOR:
+            std::cout << "FOR\n";
+            print_indent(indent + 1); std::cout << "Init:\n";
+            print_ast(tree->data.for_loop.init, indent + 2);
+            print_indent(indent + 1); std::cout << "Cond:\n";
+            print_ast(tree->data.for_loop.cond, indent + 2);
+            print_indent(indent + 1); std::cout << "Update:\n";
+            print_ast(tree->data.for_loop.update, indent + 2);
+            print_indent(indent + 1); std::cout << "Body:\n";
+            print_ast(tree->data.for_loop.body, indent + 2);
             break;
 
         case NODE_SEQ:
