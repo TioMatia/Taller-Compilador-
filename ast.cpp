@@ -1,6 +1,10 @@
 #include "ast.h"
 #include <iostream>
 #include <cstring>
+#include <map>
+#include <string>
+
+std::map<std::string, int> variables;
 
 AST* make_int(int val) {
     AST* node = new AST;
@@ -126,3 +130,63 @@ void print_ast(AST* tree, int indent) {
             break;
     }
 }
+int eval_ast(AST* tree) {
+    if (!tree) return 0;
+
+    switch (tree->type) {
+        case NODE_INT:
+            return tree->data.intval;
+
+        case NODE_ID:
+            return variables[tree->data.id];
+
+        case NODE_ASSIGN: {
+            std::string var = tree->data.bin.left->data.id;
+            int val = eval_ast(tree->data.bin.right);
+            variables[var] = val;
+            return val;
+        }
+
+        case NODE_PRINT: {
+            int val = eval_ast(tree->data.bin.left);
+            std::cout << val << std::endl;
+            return 0;
+        }
+
+        case NODE_BINOP: {
+            int lhs = eval_ast(tree->data.bin.left);
+            int rhs = eval_ast(tree->data.bin.right);
+            switch (tree->op) {
+                case OP_EQ: return lhs == rhs;
+                case OP_PLUS: return lhs + rhs;
+                case OP_MINUS: return lhs - rhs;
+                case OP_MULT: return lhs * rhs;
+                case OP_DIV: return rhs != 0 ? lhs / rhs : 0;
+                case OP_LT: return lhs < rhs;
+                case OP_GT: return lhs > rhs;
+                default: return 0;
+            }
+        }
+
+        case NODE_IF: {
+            if (eval_ast(tree->data.ctrl.cond))
+                return eval_ast(tree->data.ctrl.then_branch);
+            else if (tree->data.ctrl.else_branch)
+                return eval_ast(tree->data.ctrl.else_branch);
+            return 0;
+        }
+
+        case NODE_WHILE: {
+            while (eval_ast(tree->data.ctrl.cond))
+                eval_ast(tree->data.ctrl.then_branch);
+            return 0;
+        }
+
+        case NODE_SEQ:
+            eval_ast(tree->data.seq.first);
+            return eval_ast(tree->data.seq.second);
+    }
+
+    return 0;
+}
+

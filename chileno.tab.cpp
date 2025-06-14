@@ -1726,7 +1726,10 @@ int main() {
     if (yyparse() == 0 && tree != nullptr) {
         std::cout << "Arbol de sintaxis generado:\n";
         print_ast(tree, 0);
+        std::cout << "\n--- Ejecución del programa ---\n";
+        eval_ast(tree);
     }
     return 0;
 }
+
 

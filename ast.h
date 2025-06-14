@@ -56,5 +56,6 @@ AST* make_while(AST* cond, AST* body);
 AST* make_binop(int op, AST* lhs, AST* rhs);
 AST* make_seq(AST* first, AST* second);
 void print_ast(AST* tree, int indent);
+int eval_ast(AST* tree);
 
 #endif
