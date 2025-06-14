@@ -3,9 +3,10 @@
 #include <cstring>
 #include <map>
 #include <string>
+#include <vector>
 
 std::map<std::string, int> variables;
-static std::map<std::string, AST*> funciones; // tabla de funciones
+static std::map<std::string, std::pair<AST*, std::vector<std::string>>> funciones;
 
 AST* make_int(int val) {
     AST* node = new AST;
@@ -73,85 +74,42 @@ AST* make_seq(AST* first, AST* second) {
     return node;
 }
 
-AST* make_func_def(const char* name, AST* body) {
+AST* make_func_def(const char* name, AST* params, AST* body) {
     AST* node = new AST;
     node->type = NODE_FUNC_DEF;
     node->data.func_def.name = strdup(name);
+    node->data.func_def.params = params;
     node->data.func_def.body = body;
     return node;
 }
 
-AST* make_func_call(const char* name) {
+AST* make_func_call(const char* name, AST* args) {
     AST* node = new AST;
     node->type = NODE_FUNC_CALL;
     node->data.func_call.name = strdup(name);
+    node->data.func_call.args = args;
     return node;
 }
 
-void print_ast(AST* tree, int indent) {
-    if (!tree) return;
-    for (int i = 0; i < indent; ++i) std::cout << "  ";
+AST* make_args(std::vector<AST*>* values) {
+    AST* node = new AST;
+    node->type = NODE_ARGS;
+    node->data.args.values = values;
+    return node;
+}
 
-    switch (tree->type) {
-        case NODE_INT:
-            std::cout << "INT: " << tree->data.intval << std::endl;
-            break;
-        case NODE_ID:
-            std::cout << "ID: " << tree->data.id << std::endl;
-            break;
-        case NODE_ASSIGN:
-            std::cout << "ASSIGN:\n";
-            print_ast(tree->data.bin.left, indent + 1);
-            print_ast(tree->data.bin.right, indent + 1);
-            break;
-        case NODE_PRINT:
-            std::cout << "PRINT:\n";
-            print_ast(tree->data.bin.left, indent + 1);
-            break;
-        case NODE_IF:
-            std::cout << "IF:\n";
-            print_ast(tree->data.ctrl.cond, indent + 1);
-            std::cout << "THEN:\n";
-            print_ast(tree->data.ctrl.then_branch, indent + 1);
-            if (tree->data.ctrl.else_branch) {
-                std::cout << "ELSE:\n";
-                print_ast(tree->data.ctrl.else_branch, indent + 1);
-            }
-            break;
-        case NODE_WHILE:
-            std::cout << "WHILE:\n";
-            print_ast(tree->data.ctrl.cond, indent + 1);
-            print_ast(tree->data.ctrl.then_branch, indent + 1);
-            break;
-        case NODE_BINOP:
-            std::cout << "BINOP ";
-            switch (tree->op) {
-                case OP_PLUS: std::cout << "(+)"; break;
-                case OP_MINUS: std::cout << "(-)"; break;
-                case OP_MULT: std::cout << "(*)"; break;
-                case OP_DIV: std::cout << "(/)"; break;
-                case OP_EQ: std::cout << "(==)"; break;
-                case OP_LT: std::cout << "(<)"; break;
-                case OP_GT: std::cout << "(>)"; break;
-                default: std::cout << "(unknown)"; break;
-            }
-            std::cout << ":\n";
-            print_ast(tree->data.bin.left, indent + 1);
-            print_ast(tree->data.bin.right, indent + 1);
-            break;
-        case NODE_SEQ:
-            std::cout << "SEQ:\n";
-            print_ast(tree->data.seq.first, indent + 1);
-            print_ast(tree->data.seq.second, indent + 1);
-            break;
-        case NODE_FUNC_DEF:
-            std::cout << "FUNC_DEF: " << tree->data.func_def.name << "\n";
-            print_ast(tree->data.func_def.body, indent + 1);
-            break;
-        case NODE_FUNC_CALL:
-            std::cout << "FUNC_CALL: " << tree->data.func_call.name << std::endl;
-            break;
-    }
+AST* make_params(std::vector<std::string>* names) {
+    AST* node = new AST;
+    node->type = NODE_PARAMS;
+    node->data.params.names = names;
+    return node;
+}
+
+AST* make_return(AST* expr) {
+    AST* node = new AST;
+    node->type = NODE_RETURN;
+    node->data.ret.expr = expr;
+    return node;
 }
 
 int eval_ast(AST* tree) {
@@ -210,19 +168,137 @@ int eval_ast(AST* tree) {
             eval_ast(tree->data.seq.first);
             return eval_ast(tree->data.seq.second);
 
-        case NODE_FUNC_DEF:
-            // Guardar función en tabla
-            funciones[tree->data.func_def.name] = tree->data.func_def.body;
+        case NODE_FUNC_DEF: {
+            std::vector<std::string>* names = tree->data.func_def.params ? tree->data.func_def.params->data.params.names : new std::vector<std::string>();
+            funciones[tree->data.func_def.name] = {tree->data.func_def.body, *names};
             return 0;
+        }
 
-        case NODE_FUNC_CALL:
+        case NODE_FUNC_CALL: {
             if (funciones.count(tree->data.func_call.name)) {
-                return eval_ast(funciones[tree->data.func_call.name]);
+                auto [body, param_names] = funciones[tree->data.func_call.name];
+
+                std::map<std::string, int> saved_vars = variables;
+
+                std::vector<AST*>* args = tree->data.func_call.args ? tree->data.func_call.args->data.args.values : new std::vector<AST*>();
+
+                for (size_t i = 0; i < param_names.size(); ++i) {
+                    int val = i < args->size() ? eval_ast((*args)[i]) : 0;
+                    variables[param_names[i]] = val;
+                }
+
+                int result = eval_ast(body);
+
+                variables = saved_vars;
+
+                return result;
             } else {
                 std::cerr << "Error: función '" << tree->data.func_call.name << "' no definida.\n";
                 return 0;
             }
-    }
+        }
 
-    return 0;
+        case NODE_RETURN:
+            return eval_ast(tree->data.ret.expr);
+
+        default:
+            return 0;
+    }
+}
+
+// Funciones para imprimir el AST
+
+void print_indent(int indent) {
+    for (int i = 0; i < indent; ++i) std::cout << "  ";
+}
+
+void print_ast(AST* tree, int indent) {
+    if (!tree) return;
+
+    print_indent(indent);
+
+    switch (tree->type) {
+        case NODE_INT:
+            std::cout << "INT: " << tree->data.intval << "\n";
+            break;
+
+        case NODE_ID:
+            std::cout << "ID: " << tree->data.id << "\n";
+            break;
+
+        case NODE_ASSIGN:
+            std::cout << "ASSIGN\n";
+            print_ast(tree->data.bin.left, indent + 1);
+            print_ast(tree->data.bin.right, indent + 1);
+            break;
+
+        case NODE_PRINT:
+            std::cout << "PRINT\n";
+            print_ast(tree->data.bin.left, indent + 1);
+            break;
+
+        case NODE_BINOP:
+            std::cout << "BINOP (" << tree->op << ")\n";
+            print_ast(tree->data.bin.left, indent + 1);
+            print_ast(tree->data.bin.right, indent + 1);
+            break;
+
+        case NODE_IF:
+            std::cout << "IF\n";
+            print_ast(tree->data.ctrl.cond, indent + 1);
+            print_ast(tree->data.ctrl.then_branch, indent + 1);
+            if (tree->data.ctrl.else_branch)
+                print_ast(tree->data.ctrl.else_branch, indent + 1);
+            break;
+
+        case NODE_WHILE:
+            std::cout << "WHILE\n";
+            print_ast(tree->data.ctrl.cond, indent + 1);
+            print_ast(tree->data.ctrl.then_branch, indent + 1);
+            break;
+
+        case NODE_SEQ:
+            std::cout << "SEQ\n";
+            print_ast(tree->data.seq.first, indent + 1);
+            print_ast(tree->data.seq.second, indent + 1);
+            break;
+
+        case NODE_FUNC_DEF:
+            std::cout << "FUNC_DEF: " << tree->data.func_def.name << "\n";
+            print_ast(tree->data.func_def.params, indent + 1);
+            print_ast(tree->data.func_def.body, indent + 1);
+            break;
+
+        case NODE_FUNC_CALL:
+            std::cout << "FUNC_CALL: " << tree->data.func_call.name << "\n";
+            print_ast(tree->data.func_call.args, indent + 1);
+            break;
+
+        case NODE_ARGS:
+            std::cout << "ARGS\n";
+            if (tree->data.args.values) {
+                for (AST* arg : *(tree->data.args.values)) {
+                    print_ast(arg, indent + 1);
+                }
+            }
+            break;
+
+        case NODE_PARAMS:
+            std::cout << "PARAMS\n";
+            if (tree->data.params.names) {
+                for (const std::string& param : *(tree->data.params.names)) {
+                    print_indent(indent + 1);
+                    std::cout << param << "\n";
+                }
+            }
+            break;
+
+        case NODE_RETURN:
+            std::cout << "RETURN\n";
+            print_ast(tree->data.ret.expr, indent + 1);
+            break;
+
+        default:
+            std::cout << "Nodo desconocido\n";
+    }
 }

@@ -1,5 +1,24 @@
-pega saludo {
-    muestra_la_wa 123;
+x = 5;
+y = 10;
+z = x + y * 2;
+
+imprime_la_wa z;
+
+si_po (z > 20) {
+    imprime_la_wa 100;
+} si_no {
+    imprime_la_wa 0;
 }
 
-saludo();
+pega suma(a, b) {
+    devuelve_la_wa a + b;
+}
+
+imprime_la_wa suma(3, 4);
+
+mientras_la_wa (x < 10) {
+    imprime_la_wa x;
+    x = x + 1;
+}
+
+devuelve_la_wa 42;

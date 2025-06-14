@@ -32,6 +32,19 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+/* "%code requires" blocks.  */
+
+/* Line 1676 of yacc.c  */
+#line 1 "chileno.y"
+
+  #include <vector>
+  #include <string>
+  #include "ast.h"   // acá debe estar la definición de AST
+
+
+
+/* Line 1676 of yacc.c  */
+#line 48 "chileno.tab.h"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -39,25 +52,15 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     NUMBER = 258,
-     IDENTIFIER = 259,
+     NUM = 258,
+     ID = 259,
      IF = 260,
      ELSE = 261,
      WHILE = 262,
-     FOR = 263,
+     PRINT = 263,
      FUNCTION = 264,
      RETURN = 265,
-     TYPE_INT = 266,
-     PRINT = 267,
-     READ = 268,
-     ASSIGN = 269,
-     EQ = 270,
-     LT = 271,
-     GT = 272,
-     PLUS = 273,
-     MINUS = 274,
-     MULT = 275,
-     DIV = 276
+     EQ = 266
    };
 #endif
 
@@ -68,16 +71,18 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 14 "chileno.y"
+#line 20 "chileno.y"
 
     int intval;
-    char* id;
+    char* strval;
     AST* ast;
+    std::vector<AST*>* astlist;
+    std::vector<std::string>* strlist;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 81 "chileno.tab.h"
+#line 86 "chileno.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

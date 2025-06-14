@@ -1,98 +1,108 @@
+%code requires {
+  #include <vector>
+  #include <string>
+  #include "ast.h"   // acá debe estar la definición de AST
+}
+
 %{
 #include <iostream>
 #include <cstdlib>
-#include <cstring>
+#include <vector>
+#include <string>
 #include "ast.h"
 
 extern int yylex();
-void yyerror(const char *s) {
-    std::cerr << "Error: " << s << std::endl;
-}
+void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; }
+
 AST* tree;
 %}
 
 %union {
     int intval;
-    char* id;
+    char* strval;
     AST* ast;
+    std::vector<AST*>* astlist;
+    std::vector<std::string>* strlist;
 }
 
-%start program
+%token <intval> NUM
+%token <strval> ID
+%token IF ELSE WHILE PRINT FUNCTION RETURN EQ
 
-%token <intval> NUMBER
-%token <id> IDENTIFIER
-%token IF ELSE WHILE FOR FUNCTION RETURN
-%token TYPE_INT PRINT READ ASSIGN EQ LT GT PLUS MINUS MULT DIV
-
-%type <ast> program statements statement expr func_def func_call
-
-%left EQ
-%left LT GT
-%left PLUS MINUS
-%left MULT DIV
+%type <ast> expr stmt stmts program func_def func_call return_stmt
+%type <astlist> arg_list
+%type <strlist> param_list
 
 %%
 
-program:
-    statements              { tree = $1; }
-;
+program
+    : stmts                      { tree = $1; }
+    ;
 
-statements:
-    statements statement    { $$ = make_seq($1, $2); }
-  | statement               { $$ = $1; }
-;
+stmts
+    : stmt                       { $$ = $1; }
+    | stmts stmt                 { $$ = make_seq($1, $2); }
+    ;
 
-statement:
-    TYPE_INT IDENTIFIER ';'           { $$ = nullptr; }
-  | IDENTIFIER ASSIGN expr ';'        { $$ = make_assign(make_id($1), $3); }
-  | PRINT expr ';'                    { $$ = make_print($2); }
-  | IF expr '{' statements '}' ELSE '{' statements '}' {
-        $$ = make_if($2, $4, $8);
-    }
-  | WHILE expr '{' statements '}'     { $$ = make_while($2, $4); }
-  | FOR TYPE_INT IDENTIFIER ASSIGN expr ';' expr ';' IDENTIFIER ASSIGN expr '{' statements '}' {
-      AST* init = make_assign(make_id($3), $5);
-      AST* cond = $7;
-      AST* update = make_assign(make_id($9), $11);
-      AST* body_with_update = make_seq($13, update);
-      $$ = make_seq(init, make_while(cond, body_with_update));
-  }
-  | func_def                         { $$ = $1; }
-  | func_call ';'                   { $$ = $1; }
-;
+stmt
+    : expr ';'                   { $$ = $1; }
+    | PRINT expr ';'             { $$ = make_print($2); }
+    | IF '(' expr ')' stmt       { $$ = make_if($3, $5, nullptr); }
+    | IF '(' expr ')' stmt ELSE stmt
+                                 { $$ = make_if($3, $5, $7); }
+    | WHILE '(' expr ')' stmt    { $$ = make_while($3, $5); }
+    | '{' stmts '}'              { $$ = $2; }
+    | func_def                   { $$ = $1; }
+    | return_stmt                { $$ = $1; }
+    ;
 
-func_def:
-    FUNCTION IDENTIFIER '{' statements '}' {
-        $$ = make_func_def($2, $4);
-    }
-;
+return_stmt
+    : RETURN expr ';'            { $$ = make_return($2); }
+    ;
 
-func_call:
-    IDENTIFIER '(' ')' {
-        $$ = make_func_call($1);
-    }
-;
+func_def
+    : FUNCTION ID '(' param_list ')' '{' stmts '}'
+                                 { $$ = make_func_def($2, make_params($4), $7); }
+    ;
 
-expr:
-    NUMBER             { $$ = make_int($1); }
-  | IDENTIFIER         { $$ = make_id($1); }
-  | expr PLUS expr     { $$ = make_binop(OP_PLUS, $1, $3); }
-  | expr MINUS expr    { $$ = make_binop(OP_MINUS, $1, $3); }
-  | expr MULT expr     { $$ = make_binop(OP_MULT, $1, $3); }
-  | expr DIV expr      { $$ = make_binop(OP_DIV, $1, $3); }
-  | expr EQ expr       { $$ = make_binop(OP_EQ, $1, $3); }
-  | expr LT expr       { $$ = make_binop(OP_LT, $1, $3); }
-  | expr GT expr       { $$ = make_binop(OP_GT, $1, $3); }
-;
+param_list
+    : /* vacío */                { $$ = new std::vector<std::string>(); }
+    | ID                         { $$ = new std::vector<std::string>({$1}); }
+    | param_list ',' ID          { $1->push_back($3); $$ = $1; }
+    ;
+
+expr
+    : NUM                        { $$ = make_int($1); }
+    | ID                         { $$ = make_id($1); }
+    | expr '+' expr              { $$ = make_binop(OP_PLUS, $1, $3); }
+    | expr '-' expr              { $$ = make_binop(OP_MINUS, $1, $3); }
+    | expr '*' expr              { $$ = make_binop(OP_MULT, $1, $3); }
+    | expr '/' expr              { $$ = make_binop(OP_DIV, $1, $3); }
+    | expr EQ expr               { $$ = make_binop(OP_EQ, $1, $3); }
+    | expr '<' expr              { $$ = make_binop(OP_LT, $1, $3); }
+    | expr '>' expr              { $$ = make_binop(OP_GT, $1, $3); }
+    | ID '=' expr                { $$ = make_assign(make_id($1), $3); }
+    | func_call                  { $$ = $1; }
+    | '(' expr ')'               { $$ = $2; }
+    ;
+
+func_call
+    : ID '(' arg_list ')'        { $$ = make_func_call($1, make_args($3)); }
+    ;
+
+arg_list
+    : /* vacío */                { $$ = new std::vector<AST*>(); }
+    | expr                       { $$ = new std::vector<AST*>({$1}); }
+    | arg_list ',' expr          { $1->push_back($3); $$ = $1; }
+    ;
 
 %%
 
 int main() {
-    if (yyparse() == 0 && tree != nullptr) {
-        std::cout << "Arbol de sintaxis generado:\n";
-        print_ast(tree, 0);
-        std::cout << "\n--- Ejecución del programa ---\n";
-        eval_ast(tree);
-    }
+    yyparse();
+    std::cout << "--- Arbol de sintaxis generado---\n";
+    print_ast(tree, 0); 
+    std::cout << "\n--- Ejecucion del programa ---\n";
+    eval_ast(tree);
     return 0;
 }
