@@ -10,8 +10,8 @@ float b;
 b = 3.14;
 imprime_la_wa(b);  
 
-string saludo;
-saludo = "Hola mundo";
+
+string saludo = "Hola mundo";
 imprime_la_wa(saludo);  
 
 imprime_la_wa(duplicar(a));

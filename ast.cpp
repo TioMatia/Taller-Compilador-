@@ -173,8 +173,11 @@ Value eval_ast(AST* tree) {
     switch (tree->type) {
         case NODE_DECL: {
             std::string var = tree->data.decl.nombre;
-            variables[var] = Value(); // Variable declarada sin valor (NONE)
-            tree->value = 0;
+            if (variables.count(var)) {
+                std::cerr << "Error: variable '" << var << "' ya declarada.\n";
+                exit(1);
+            }
+            variables[var] = Value(); // Declarada sin valor inicial
             return Value();
         }
         case NODE_INT: {
@@ -192,21 +195,27 @@ Value eval_ast(AST* tree) {
             tree->value = 0;
             return v;
         }
+        
         case NODE_ID: {
             std::string var = tree->data.id;
-            if (variables.count(var))
-                return variables[var];
-            else {
-                std::cerr << "Variable no definida: " << var << "\n";
-                return Value();
+            if (variables.count(var) == 0) {
+                std::cerr << "Error: variable no definida: " << var << "\n";
+                exit(1);
             }
+            return variables[var];
         }
+
         case NODE_ASSIGN: {
             std::string var = tree->data.bin.left->data.id;
+            if (variables.count(var) == 0) {
+                std::cerr << "Error: asignación a variable no declarada: " << var << "\n";
+                exit(1);
+            }
             Value val = eval_ast(tree->data.bin.right);
             variables[var] = val;
             return val;
         }
+
         case NODE_PRINT: {
             Value val = eval_ast(tree->data.bin.left);
             switch (val.type) {

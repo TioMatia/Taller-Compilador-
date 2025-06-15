@@ -74,6 +74,7 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <map>
 #include "ast.h"
 
 extern int yylex();
@@ -81,9 +82,11 @@ void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; }
 
 AST* tree;
 
+std::map<std::string, bool> tabla_simbolos;  // Guardar variables declaradas
+
 
 /* Line 189 of yacc.c  */
-#line 87 "chileno.tab.c"
+#line 90 "chileno.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -115,7 +118,7 @@ AST* tree;
 
 
 /* Line 209 of yacc.c  */
-#line 119 "chileno.tab.c"
+#line 122 "chileno.tab.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -151,7 +154,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 20 "chileno.y"
+#line 23 "chileno.y"
 
     int intval;
     float floatval;
@@ -163,7 +166,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 167 "chileno.tab.c"
+#line 170 "chileno.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -175,7 +178,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 179 "chileno.tab.c"
+#line 182 "chileno.tab.c"
 
 #ifdef short
 # undef short
@@ -479,11 +482,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    41,    41,    45,    46,    50,    51,    52,    53,    55,
-      56,    58,    59,    60,    61,    65,    66,    67,    68,    69,
-      70,    75,    79,    84,    85,    86,    90,    91,    92,    93,
-      94,    95,    96,    97,    98,    99,   100,   101,   102,   103,
-     104,   105,   106,   110,   114,   115,   116
+       0,    44,    44,    48,    49,    53,    54,    55,    56,    58,
+      59,    61,    62,    63,    64,    68,    76,    84,    92,   100,
+     108,   119,   123,   128,   129,   137,   149,   150,   151,   152,
+     159,   160,   161,   162,   163,   164,   165,   166,   167,   168,
+     169,   176,   177,   181,   185,   186,   187
 };
 #endif
 
@@ -1486,322 +1489,391 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 41 "chileno.y"
+#line 44 "chileno.y"
     { tree = (yyvsp[(1) - (1)].ast); ;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 45 "chileno.y"
+#line 48 "chileno.y"
     { (yyval.ast) = (yyvsp[(1) - (1)].ast); ;}
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 46 "chileno.y"
+#line 49 "chileno.y"
     { (yyval.ast) = make_seq((yyvsp[(1) - (2)].ast), (yyvsp[(2) - (2)].ast)); ;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 50 "chileno.y"
+#line 53 "chileno.y"
     { (yyval.ast) = (yyvsp[(1) - (2)].ast); ;}
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 51 "chileno.y"
+#line 54 "chileno.y"
     { (yyval.ast) = make_print((yyvsp[(2) - (3)].ast)); ;}
     break;
 
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 52 "chileno.y"
+#line 55 "chileno.y"
     { (yyval.ast) = make_if((yyvsp[(3) - (5)].ast), (yyvsp[(5) - (5)].ast), nullptr); ;}
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 54 "chileno.y"
+#line 57 "chileno.y"
     { (yyval.ast) = make_if((yyvsp[(3) - (7)].ast), (yyvsp[(5) - (7)].ast), (yyvsp[(7) - (7)].ast)); ;}
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 55 "chileno.y"
+#line 58 "chileno.y"
     { (yyval.ast) = make_while((yyvsp[(3) - (5)].ast), (yyvsp[(5) - (5)].ast)); ;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 57 "chileno.y"
+#line 60 "chileno.y"
     { (yyval.ast) = make_for((yyvsp[(3) - (9)].ast), (yyvsp[(5) - (9)].ast), (yyvsp[(7) - (9)].ast), (yyvsp[(9) - (9)].ast)); ;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 58 "chileno.y"
+#line 61 "chileno.y"
     { (yyval.ast) = (yyvsp[(2) - (3)].ast); ;}
     break;
 
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 59 "chileno.y"
+#line 62 "chileno.y"
     { (yyval.ast) = (yyvsp[(1) - (1)].ast); ;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 60 "chileno.y"
+#line 63 "chileno.y"
     { (yyval.ast) = (yyvsp[(1) - (1)].ast); ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 61 "chileno.y"
+#line 64 "chileno.y"
     { (yyval.ast) = (yyvsp[(1) - (2)].ast); ;}
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 65 "chileno.y"
-    { (yyval.ast) = make_decl("int", (yyvsp[(2) - (2)].strval)); ;}
+#line 68 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(2) - (2)].strval))) {
+                                    std::cerr << "Error: variable '" << (yyvsp[(2) - (2)].strval) << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[(yyvsp[(2) - (2)].strval)] = true;
+                                  (yyval.ast) = make_decl("int", (yyvsp[(2) - (2)].strval));
+                                ;}
     break;
 
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 66 "chileno.y"
-    { (yyval.ast) = make_seq(make_decl("int", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast))); ;}
+#line 76 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(2) - (4)].strval))) {
+                                    std::cerr << "Error: variable '" << (yyvsp[(2) - (4)].strval) << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[(yyvsp[(2) - (4)].strval)] = true;
+                                  (yyval.ast) = make_seq(make_decl("int", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast)));
+                                ;}
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 67 "chileno.y"
-    { (yyval.ast) = make_decl("float", (yyvsp[(2) - (2)].strval)); ;}
+#line 84 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(2) - (2)].strval))) {
+                                    std::cerr << "Error: variable '" << (yyvsp[(2) - (2)].strval) << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[(yyvsp[(2) - (2)].strval)] = true;
+                                  (yyval.ast) = make_decl("float", (yyvsp[(2) - (2)].strval));
+                                ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 68 "chileno.y"
-    { (yyval.ast) = make_seq(make_decl("float", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast))); ;}
+#line 92 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(2) - (4)].strval))) {
+                                    std::cerr << "Error: variable '" << (yyvsp[(2) - (4)].strval) << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[(yyvsp[(2) - (4)].strval)] = true;
+                                  (yyval.ast) = make_seq(make_decl("float", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast)));
+                                ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 69 "chileno.y"
-    { (yyval.ast) = make_decl("string", (yyvsp[(2) - (2)].strval)); ;}
+#line 100 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(2) - (2)].strval))) {
+                                    std::cerr << "Error: variable '" << (yyvsp[(2) - (2)].strval) << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[(yyvsp[(2) - (2)].strval)] = true;
+                                  (yyval.ast) = make_decl("string", (yyvsp[(2) - (2)].strval));
+                                ;}
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 70 "chileno.y"
-    { (yyval.ast) = make_seq(make_decl("string", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast))); ;}
+#line 108 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(2) - (4)].strval))) {
+                                    std::cerr << "Error: variable '" << (yyvsp[(2) - (4)].strval) << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[(yyvsp[(2) - (4)].strval)] = true;
+                                  (yyval.ast) = make_seq(make_decl("string", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast)));
+                                ;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 75 "chileno.y"
+#line 119 "chileno.y"
     { (yyval.ast) = make_return((yyvsp[(2) - (3)].ast)); ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 80 "chileno.y"
+#line 124 "chileno.y"
     { (yyval.ast) = make_func_def((yyvsp[(2) - (8)].strval), make_params((yyvsp[(4) - (8)].strlist)), (yyvsp[(7) - (8)].ast)); ;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 84 "chileno.y"
+#line 128 "chileno.y"
     { (yyval.strlist) = new std::vector<std::string>(); ;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 85 "chileno.y"
-    { (yyval.strlist) = new std::vector<std::string>({(yyvsp[(1) - (1)].strval)}); ;}
+#line 129 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(1) - (1)].strval))) {
+                                    std::cerr << "Error: parametro '" << (yyvsp[(1) - (1)].strval) << "' ya declarado como variable\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[(yyvsp[(1) - (1)].strval)] = true;
+                                  (yyval.strlist) = new std::vector<std::string>({(yyvsp[(1) - (1)].strval)});
+                                ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 86 "chileno.y"
-    { (yyvsp[(1) - (3)].strlist)->push_back((yyvsp[(3) - (3)].strval)); (yyval.strlist) = (yyvsp[(1) - (3)].strlist); ;}
+#line 137 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(3) - (3)].strval))) {
+                                    std::cerr << "Error: parametro '" << (yyvsp[(3) - (3)].strval) << "' ya declarado como variable\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[(yyvsp[(3) - (3)].strval)] = true;
+                                  (yyvsp[(1) - (3)].strlist)->push_back((yyvsp[(3) - (3)].strval));
+                                  (yyval.strlist) = (yyvsp[(1) - (3)].strlist);
+                                ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 90 "chileno.y"
+#line 149 "chileno.y"
     { (yyval.ast) = make_int((yyvsp[(1) - (1)].intval)); ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 91 "chileno.y"
+#line 150 "chileno.y"
     { (yyval.ast) = make_float((yyvsp[(1) - (1)].floatval)); ;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 92 "chileno.y"
+#line 151 "chileno.y"
     { (yyval.ast) = make_string((yyvsp[(1) - (1)].strval)); ;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 93 "chileno.y"
-    { (yyval.ast) = make_id((yyvsp[(1) - (1)].strval)); ;}
+#line 152 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(1) - (1)].strval)) == 0) {
+                                    std::cerr << "Error sintactico: variable '" << (yyvsp[(1) - (1)].strval) << "' no declarada\n";
+                                    exit(1);
+                                  }
+                                  (yyval.ast) = make_id((yyvsp[(1) - (1)].strval));
+                                ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 94 "chileno.y"
+#line 159 "chileno.y"
     { (yyval.ast) = make_binop(OP_PLUS, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 95 "chileno.y"
+#line 160 "chileno.y"
     { (yyval.ast) = make_binop(OP_MINUS, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 96 "chileno.y"
+#line 161 "chileno.y"
     { (yyval.ast) = make_binop(OP_MULT, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 97 "chileno.y"
+#line 162 "chileno.y"
     { (yyval.ast) = make_binop(OP_DIV, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 98 "chileno.y"
+#line 163 "chileno.y"
     { (yyval.ast) = make_binop(OP_EQ, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 99 "chileno.y"
+#line 164 "chileno.y"
     { (yyval.ast) = make_binop(OP_LT, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 100 "chileno.y"
+#line 165 "chileno.y"
     { (yyval.ast) = make_binop(OP_GT, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 101 "chileno.y"
+#line 166 "chileno.y"
     { (yyval.ast) = make_binop(OP_NEQ, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 102 "chileno.y"
+#line 167 "chileno.y"
     { (yyval.ast) = make_binop(OP_LEQ, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 103 "chileno.y"
+#line 168 "chileno.y"
     { (yyval.ast) = make_binop(OP_GEQ, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 104 "chileno.y"
-    { (yyval.ast) = make_assign(make_id((yyvsp[(1) - (3)].strval)), (yyvsp[(3) - (3)].ast)); ;}
+#line 169 "chileno.y"
+    {
+                                  if (tabla_simbolos.count((yyvsp[(1) - (3)].strval)) == 0) {
+                                    std::cerr << "Error sintactico: variable '" << (yyvsp[(1) - (3)].strval) << "' no declarada para asignacion\n";
+                                    exit(1);
+                                  }
+                                  (yyval.ast) = make_assign(make_id((yyvsp[(1) - (3)].strval)), (yyvsp[(3) - (3)].ast));
+                                ;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 105 "chileno.y"
+#line 176 "chileno.y"
     { (yyval.ast) = (yyvsp[(1) - (1)].ast); ;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 106 "chileno.y"
+#line 177 "chileno.y"
     { (yyval.ast) = (yyvsp[(2) - (3)].ast); ;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 110 "chileno.y"
+#line 181 "chileno.y"
     { (yyval.ast) = make_func_call((yyvsp[(1) - (4)].strval), make_args((yyvsp[(3) - (4)].astlist))); ;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 114 "chileno.y"
+#line 185 "chileno.y"
     { (yyval.astlist) = new std::vector<AST*>(); ;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 115 "chileno.y"
+#line 186 "chileno.y"
     { (yyval.astlist) = new std::vector<AST*>({(yyvsp[(1) - (1)].ast)}); ;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 116 "chileno.y"
+#line 187 "chileno.y"
     { (yyvsp[(1) - (3)].astlist)->push_back((yyvsp[(3) - (3)].ast)); (yyval.astlist) = (yyvsp[(1) - (3)].astlist); ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1805 "chileno.tab.c"
+#line 1877 "chileno.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2013,12 +2085,12 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 119 "chileno.y"
+#line 190 "chileno.y"
 
 
 int main() {
     yyparse();
-    std::cout << "--- Arbol de sintaxis generado---\n";
+    std::cout << "--- Arbol de sintaxis generado ---\n";
     print_ast(tree, 0); 
     std::cout << "\n--- Ejecucion del programa ---\n";
     eval_ast(tree);

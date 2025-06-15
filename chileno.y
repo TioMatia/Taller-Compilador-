@@ -9,12 +9,15 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <map>
 #include "ast.h"
 
 extern int yylex();
 void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; }
 
 AST* tree;
+
+std::map<std::string, bool> tabla_simbolos;  // Guardar variables declaradas
 %}
 
 %union {
@@ -62,14 +65,55 @@ stmt
     ;
 
 decl
-    : TIPO_INT ID                { $$ = make_decl("int", $2); }
-    | TIPO_INT ID '=' expr       { $$ = make_seq(make_decl("int", $2), make_assign(make_id($2), $4)); }
-    | TIPO_FLOAT ID              { $$ = make_decl("float", $2); }
-    | TIPO_FLOAT ID '=' expr     { $$ = make_seq(make_decl("float", $2), make_assign(make_id($2), $4)); }
-    | TIPO_STRING ID             { $$ = make_decl("string", $2); }
-    | TIPO_STRING ID '=' expr    { $$ = make_seq(make_decl("string", $2), make_assign(make_id($2), $4)); }
+    : TIPO_INT ID                {
+                                  if (tabla_simbolos.count($2)) {
+                                    std::cerr << "Error: variable '" << $2 << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[$2] = true;
+                                  $$ = make_decl("int", $2);
+                                }
+    | TIPO_INT ID '=' expr       {
+                                  if (tabla_simbolos.count($2)) {
+                                    std::cerr << "Error: variable '" << $2 << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[$2] = true;
+                                  $$ = make_seq(make_decl("int", $2), make_assign(make_id($2), $4));
+                                }
+    | TIPO_FLOAT ID              {
+                                  if (tabla_simbolos.count($2)) {
+                                    std::cerr << "Error: variable '" << $2 << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[$2] = true;
+                                  $$ = make_decl("float", $2);
+                                }
+    | TIPO_FLOAT ID '=' expr     {
+                                  if (tabla_simbolos.count($2)) {
+                                    std::cerr << "Error: variable '" << $2 << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[$2] = true;
+                                  $$ = make_seq(make_decl("float", $2), make_assign(make_id($2), $4));
+                                }
+    | TIPO_STRING ID             {
+                                  if (tabla_simbolos.count($2)) {
+                                    std::cerr << "Error: variable '" << $2 << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[$2] = true;
+                                  $$ = make_decl("string", $2);
+                                }
+    | TIPO_STRING ID '=' expr    {
+                                  if (tabla_simbolos.count($2)) {
+                                    std::cerr << "Error: variable '" << $2 << "' ya declarada\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[$2] = true;
+                                  $$ = make_seq(make_decl("string", $2), make_assign(make_id($2), $4));
+                                }
     ;
-
 
 return_stmt
     : RETURN expr ';'            { $$ = make_return($2); }
@@ -82,15 +126,36 @@ func_def
 
 param_list
     : /* vacío */                { $$ = new std::vector<std::string>(); }
-    | ID                         { $$ = new std::vector<std::string>({$1}); }
-    | param_list ',' ID          { $1->push_back($3); $$ = $1; }
+    | ID                         {
+                                  if (tabla_simbolos.count($1)) {
+                                    std::cerr << "Error: parametro '" << $1 << "' ya declarado como variable\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[$1] = true;
+                                  $$ = new std::vector<std::string>({$1});
+                                }
+    | param_list ',' ID          {
+                                  if (tabla_simbolos.count($3)) {
+                                    std::cerr << "Error: parametro '" << $3 << "' ya declarado como variable\n";
+                                    exit(1);
+                                  }
+                                  tabla_simbolos[$3] = true;
+                                  $1->push_back($3);
+                                  $$ = $1;
+                                }
     ;
 
 expr
     : NUM                        { $$ = make_int($1); }
     | FLOAT                      { $$ = make_float($1); }
     | STRING                     { $$ = make_string($1); }
-    | ID                         { $$ = make_id($1); }
+    | ID                         {
+                                  if (tabla_simbolos.count($1) == 0) {
+                                    std::cerr << "Error sintactico: variable '" << $1 << "' no declarada\n";
+                                    exit(1);
+                                  }
+                                  $$ = make_id($1);
+                                }
     | expr '+' expr              { $$ = make_binop(OP_PLUS, $1, $3); }
     | expr '-' expr              { $$ = make_binop(OP_MINUS, $1, $3); }
     | expr '*' expr              { $$ = make_binop(OP_MULT, $1, $3); }
@@ -101,7 +166,13 @@ expr
     | expr NEQ expr              { $$ = make_binop(OP_NEQ, $1, $3); }
     | expr LEQ expr              { $$ = make_binop(OP_LEQ, $1, $3); }
     | expr GEQ expr              { $$ = make_binop(OP_GEQ, $1, $3); }
-    | ID '=' expr                { $$ = make_assign(make_id($1), $3); }
+    | ID '=' expr                {
+                                  if (tabla_simbolos.count($1) == 0) {
+                                    std::cerr << "Error sintactico: variable '" << $1 << "' no declarada para asignacion\n";
+                                    exit(1);
+                                  }
+                                  $$ = make_assign(make_id($1), $3);
+                                }
     | func_call                  { $$ = $1; }
     | '(' expr ')'               { $$ = $2; }
     ;
@@ -120,7 +191,7 @@ arg_list
 
 int main() {
     yyparse();
-    std::cout << "--- Arbol de sintaxis generado---\n";
+    std::cout << "--- Arbol de sintaxis generado ---\n";
     print_ast(tree, 0); 
     std::cout << "\n--- Ejecucion del programa ---\n";
     eval_ast(tree);
