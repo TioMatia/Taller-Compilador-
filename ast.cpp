@@ -166,6 +166,16 @@ AST* make_float(float val) {
     return node;
 }
 
+AST* make_input(AST* variable) {
+    AST* node = new AST;
+    node->type = NODE_INPUT;
+    node->data.input.variable = variable;
+    return node;
+}
+
+
+
+
 
 Value eval_ast(AST* tree) {
     if (!tree) return Value();
@@ -177,12 +187,12 @@ Value eval_ast(AST* tree) {
                 std::cerr << "Error: variable '" << var << "' ya declarada.\n";
                 exit(1);
             }
-            variables[var] = Value(); // Declarada sin valor inicial
+            variables[var] = Value(); 
             return Value();
         }
         case NODE_INT: {
             Value v(tree->data.intval);
-            tree->value = 0; // Este campo ya no se usa
+            tree->value = 0; 
             return v;
         }
         case NODE_FLOAT: {
@@ -381,10 +391,45 @@ Value eval_ast(AST* tree) {
             }
             return Value();
         }
+
+        case NODE_INPUT: {
+            AST* var_node = tree->data.input.variable;
+            if (!var_node || var_node->type != NODE_ID) {
+                std::cerr << "Error: input espera una variable válida\n";
+                exit(1);
+            }
+
+            std::string var = var_node->data.id;
+            if (variables.count(var) == 0) {
+                std::cerr << "Error: variable no declarada: " << var << "\n";
+                exit(1);
+            }
+
+            std::cout << "Ingresa valor para " << var << ": ";
+            std::string input;
+            std::getline(std::cin, input);
+
+            try {
+                if (input.find('.') != std::string::npos) {
+                    float f = std::stof(input);
+                    variables[var] = Value(f);
+                } else {
+                    int i = std::stoi(input);
+                    variables[var] = Value(i);
+                }
+            } catch (...) {
+                variables[var] = Value(input);
+            }
+
+            return variables[var];
+        }
+
+
         case NODE_SEQ: {
             eval_ast(tree->data.seq.first);
             return eval_ast(tree->data.seq.second);
         }
+
         case NODE_FUNC_DEF: {
             std::vector<std::string> names;
             if (tree->data.func_def.params && tree->data.func_def.params->data.params.names)

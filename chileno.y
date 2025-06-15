@@ -7,6 +7,7 @@
 %{
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 #include <vector>
 #include <string>
 #include <map>
@@ -14,10 +15,11 @@
 
 extern int yylex();
 void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; }
-
+extern FILE* yyin;
 AST* tree;
 
 std::map<std::string, bool> tabla_simbolos;  // Guardar variables declaradas
+
 %}
 
 %union {
@@ -32,7 +34,7 @@ std::map<std::string, bool> tabla_simbolos;  // Guardar variables declaradas
 %token <intval> NUM
 %token <strval> ID STRING
 %token <floatval> FLOAT
-%token IF ELSE WHILE PRINT FUNCTION RETURN EQ FOR NEQ LEQ GEQ TIPO_INT TIPO_FLOAT TIPO_STRING
+%token IF ELSE WHILE PRINT FUNCTION RETURN EQ FOR NEQ LEQ GEQ TIPO_INT TIPO_FLOAT TIPO_STRING LEE
 
 %type <ast> expr stmt stmts program func_def func_call return_stmt decl
 %type <astlist> arg_list
@@ -62,6 +64,13 @@ stmt
     | func_def                   { $$ = $1; }
     | return_stmt                { $$ = $1; }
     | decl ';'                   { $$ = $1; }
+    | LEE ID ';'                 { 
+                                    if (tabla_simbolos.count($2) == 0) {
+                                    std::cerr << "Error: variable '" << $2 << "' no declarada para input\n";
+                                    exit(1);
+                                    }
+                                    $$ = make_input(make_id($2)); 
+                                 }
     ;
 
 decl
@@ -168,7 +177,7 @@ expr
     | expr GEQ expr              { $$ = make_binop(OP_GEQ, $1, $3); }
     | ID '=' expr                {
                                   if (tabla_simbolos.count($1) == 0) {
-                                    std::cerr << "Error sintactico: variable '" << $1 << "' no declarada para asignacion\n";
+                                    std::cerr << "Error sintactico: variable '" << $1 << "' no declarada para asignacion.\n";
                                     exit(1);
                                   }
                                   $$ = make_assign(make_id($1), $3);
@@ -189,11 +198,27 @@ arg_list
 
 %%
 
-int main() {
-    yyparse();
-    std::cout << "--- Arbol de sintaxis generado ---\n";
-    print_ast(tree, 0); 
-    std::cout << "\n--- Ejecucion del programa ---\n";
-    eval_ast(tree);
+int main(int argc, char** argv) {
+    if (argc > 1) {
+        FILE* f = fopen(argv[1], "r");
+        if (!f) {
+            std::cerr << "No se pudo abrir el archivo: " << argv[1] << std::endl;
+            return 1;
+        }
+        yyin = f;
+    } else {
+        std::cerr << "Uso: ./chileno_compilador archivo.chileno.txt\n";
+        return 1;
+    }
+
+    if (yyparse() == 0) {
+        std::cout << "--- Arbol de sintaxis generado ---\n";
+        print_ast(tree, 0); 
+        std::cout << "\n--- Ejecucion del programa ---\n";
+        eval_ast(tree);
+    } else {
+        std::cerr << "Error durante el parseo.\n";
+    }
+
     return 0;
 }

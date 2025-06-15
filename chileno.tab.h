@@ -69,7 +69,8 @@
      GEQ = 272,
      TIPO_INT = 273,
      TIPO_FLOAT = 274,
-     TIPO_STRING = 275
+     TIPO_STRING = 275,
+     LEE = 276
    };
 #endif
 
@@ -80,7 +81,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 23 "chileno.y"
+#line 24 "chileno.y"
 
     int intval;
     float floatval;
@@ -92,7 +93,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 96 "chileno.tab.h"
+#line 97 "chileno.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

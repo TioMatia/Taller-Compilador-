@@ -20,6 +20,7 @@
 "int"                  return TIPO_INT;
 "float"                return TIPO_FLOAT;
 "string"               return TIPO_STRING;
+"lee"                  return LEE;
 [0-9]+\.[0-9]+          { yylval.floatval = atof(yytext); return FLOAT; }     // Flotantes
 [0-9]+                  { yylval.intval = atoi(yytext); return NUM; }         // Enteros
 \"([^\"\\]|\\.)*\"      {

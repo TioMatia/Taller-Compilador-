@@ -22,7 +22,8 @@ enum NodeType {
     NODE_ARGS,
     NODE_PARAMS,
     NODE_RETURN,
-    NODE_DECL
+    NODE_DECL,
+    NODE_INPUT  
 };
 
 enum BinOp {
@@ -37,6 +38,7 @@ enum BinOp {
     OP_LEQ,
     OP_GEQ
 };
+
 struct Value {
     enum Type { INT, FLOAT, STRING, NONE } type;
     std::variant<int, float, std::string> val;
@@ -54,14 +56,13 @@ struct Value {
 struct AST {
     NodeType type;
     int op;
-    
-    double value;  
+    double value;
 
     union {
         int intval;
-        char* id;  
+        char* id;
         float floatval;
-        char* strval;  
+        char* strval;
 
         struct {
             AST* left;
@@ -113,11 +114,14 @@ struct AST {
             char* tipo;
             char* nombre;
         } decl;
+
+        struct {
+            AST* variable; // <-- para input, a qué variable asignar
+        } input;
     } data;
 };
 
-
-
+// Funciones constructoras
 AST* make_int(int val);
 AST* make_float(float val);
 AST* make_string(const char* val);
@@ -135,6 +139,7 @@ AST* make_params(std::vector<std::string>* names);
 AST* make_return(AST* expr);
 AST* make_for(AST* init, AST* cond, AST* update, AST* body);
 AST* make_decl(const char* tipo, const char* nombre);
+AST* make_input(AST* variable); 
 
 void print_ast(AST* tree, int indent = 0);
 Value eval_ast(AST* tree);
