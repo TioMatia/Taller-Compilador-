@@ -6,7 +6,12 @@
 #include <vector>
 #include <variant>
 
-std::map<std::string, Value> variables;
+struct VarInfo {
+    std::string tipo; // "int", "float", "string"
+    Value valor;
+};
+
+static std::map<std::string, VarInfo> variables;
 static std::map<std::string, std::pair<AST*, std::vector<std::string>>> funciones;
 
 const char* op_to_str(int op) {
@@ -31,6 +36,22 @@ AST* make_int(int val) {
     node->type = NODE_INT;
     node->data.intval = val;
     node->value = val;    
+    return node;
+}
+
+AST* make_float(float val) {
+    AST* node = new AST;
+    node->type = NODE_FLOAT;
+    node->data.floatval = val;
+    node->value = val;    
+    return node;
+}
+
+AST* make_string(const char* val) {
+    AST* node = new AST;
+    node->type = NODE_STRING;
+    node->data.strval = strdup(val);
+    node->value = 0; 
     return node;
 }
 
@@ -150,22 +171,6 @@ AST* make_decl(const char* tipo, const char* nombre) {
     return node;
 }
 
-AST* make_string(const char* val) {
-    AST* node = new AST;
-    node->type = NODE_STRING;
-    node->data.strval = strdup(val);
-    node->value = 0; 
-    return node;
-}
-
-AST* make_float(float val) {
-    AST* node = new AST;
-    node->type = NODE_FLOAT;
-    node->data.floatval = val;
-    node->value = val;    
-    return node;
-}
-
 AST* make_input(AST* variable) {
     AST* node = new AST;
     node->type = NODE_INPUT;
@@ -187,43 +192,54 @@ Value eval_ast(AST* tree) {
                 std::cerr << "Error: variable '" << var << "' ya declarada.\n";
                 exit(1);
             }
-            variables[var] = Value(); 
+            variables[var] = VarInfo{tree->data.decl.tipo, Value()};
             return Value();
         }
+
         case NODE_INT: {
-            Value v(tree->data.intval);
-            tree->value = 0; 
-            return v;
+            return Value(tree->data.intval);
         }
         case NODE_FLOAT: {
-            Value v(tree->data.floatval);
-            tree->value = 0;
-            return v;
+            return Value(tree->data.floatval);
         }
         case NODE_STRING: {
-            Value v(std::string(tree->data.strval));
-            tree->value = 0;
-            return v;
+            return Value(std::string(tree->data.strval));
         }
-        
         case NODE_ID: {
             std::string var = tree->data.id;
             if (variables.count(var) == 0) {
                 std::cerr << "Error: variable no definida: " << var << "\n";
                 exit(1);
             }
-            return variables[var];
+            return variables[var].valor;
         }
 
         case NODE_ASSIGN: {
             std::string var = tree->data.bin.left->data.id;
             if (variables.count(var) == 0) {
-                std::cerr << "Error: asignación a variable no declarada: " << var << "\n";
+                std::cerr << "Error: asignacion a variable no declarada: " << var << "\n";
                 exit(1);
             }
+
             Value val = eval_ast(tree->data.bin.right);
-            variables[var] = val;
-            return val;
+            std::string tipo = variables[var].tipo;
+
+            // Validar que el tipo del valor que asignamos coincide con el tipo declarado
+            if ((tipo == "int" && val.type != Value::INT) ||
+                (tipo == "float" && val.type != Value::FLOAT && val.type != Value::INT) || // aceptar int en float
+                (tipo == "string" && val.type != Value::STRING)) {
+                std::cerr << "Error: tipo incompatible en asignacion a variable '" << var << "'\n";
+                exit(1);
+            }
+
+            // Para float, si es int lo convertimos a float
+            if (tipo == "float" && val.type == Value::INT) {
+                variables[var].valor = Value(static_cast<float>(val.asInt()));
+            } else {
+                variables[var].valor = val;
+            }
+
+            return variables[var].valor;
         }
 
         case NODE_PRINT: {
@@ -278,10 +294,9 @@ Value eval_ast(AST* tree) {
                 case OP_MINUS:
                 case OP_MULT:
                 case OP_DIV: {
-                    
                     if (!((lhs.type == Value::INT || lhs.type == Value::FLOAT) &&
-                        (rhs.type == Value::INT || rhs.type == Value::FLOAT))) {
-                        std::cerr << "Error: Operacion aritmética no soportada para estos tipos\n";
+                          (rhs.type == Value::INT || rhs.type == Value::FLOAT))) {
+                        std::cerr << "Error: Operacion aritmetica no soportada para estos tipos\n";
                         return Value();
                     }
 
@@ -298,10 +313,8 @@ Value eval_ast(AST* tree) {
                     else
                         return Value(res);
                 }
-                
                 case OP_EQ:
                 case OP_NEQ: {
-                    // Comparación general usando la variante directamente
                     bool result = (tree->op == OP_EQ) ? (lhs.val == rhs.val) : (lhs.val != rhs.val);
                     return Value(result ? 1 : 0);
                 }
@@ -309,7 +322,6 @@ Value eval_ast(AST* tree) {
                 case OP_LEQ:
                 case OP_GT:
                 case OP_GEQ: {
-                    // Comparaciones sólo permitidas entre INT o FLOAT
                     if ((lhs.type == Value::INT || lhs.type == Value::FLOAT) &&
                         (rhs.type == Value::INT || rhs.type == Value::FLOAT)) {
                         
@@ -327,25 +339,18 @@ Value eval_ast(AST* tree) {
 
                         return Value(result ? 1 : 0);
                     } else {
-                        std::cerr << "Error: Comparación no soportada para estos tipos\n";
+                        std::cerr << "Error: Comparacion no soportada para estos tipos\n";
                         return Value();
                     }
                 }
-
                 default:
                     return Value();
             }
         }
         case NODE_IF: {
             Value cond = eval_ast(tree->data.ctrl.cond);
-            bool cond_true = false;
-            if (cond.type == Value::INT)
-                cond_true = cond.asInt() != 0;
-            else if (cond.type == Value::FLOAT)
-                cond_true = cond.asFloat() != 0.0f;
-            else
-                cond_true = false;
-
+            bool cond_true = (cond.type == Value::INT && cond.asInt() != 0) ||
+                             (cond.type == Value::FLOAT && cond.asFloat() != 0.0f);
             if (cond_true)
                 return eval_ast(tree->data.ctrl.then_branch);
             else if (tree->data.ctrl.else_branch)
@@ -356,17 +361,9 @@ Value eval_ast(AST* tree) {
         case NODE_WHILE: {
             while (true) {
                 Value cond = eval_ast(tree->data.ctrl.cond);
-                bool cond_true = false;
-                if (cond.type == Value::INT)
-                    cond_true = cond.asInt() != 0;
-                else if (cond.type == Value::FLOAT)
-                    cond_true = cond.asFloat() != 0.0f;
-                else
-                    cond_true = false;
-
-                if (!cond_true)
-                    break;
-
+                bool cond_true = (cond.type == Value::INT && cond.asInt() != 0) ||
+                                 (cond.type == Value::FLOAT && cond.asFloat() != 0.0f);
+                if (!cond_true) break;
                 eval_ast(tree->data.ctrl.then_branch);
             }
             return Value();
@@ -375,27 +372,18 @@ Value eval_ast(AST* tree) {
             eval_ast(tree->data.for_loop.init);
             while (true) {
                 Value cond = eval_ast(tree->data.for_loop.cond);
-                bool cond_true = false;
-                if (cond.type == Value::INT)
-                    cond_true = cond.asInt() != 0;
-                else if (cond.type == Value::FLOAT)
-                    cond_true = cond.asFloat() != 0.0f;
-                else
-                    cond_true = false;
-
-                if (!cond_true)
-                    break;
-
+                bool cond_true = (cond.type == Value::INT && cond.asInt() != 0) ||
+                                 (cond.type == Value::FLOAT && cond.asFloat() != 0.0f);
+                if (!cond_true) break;
                 eval_ast(tree->data.for_loop.body);
                 eval_ast(tree->data.for_loop.update);
             }
             return Value();
         }
-
         case NODE_INPUT: {
             AST* var_node = tree->data.input.variable;
             if (!var_node || var_node->type != NODE_ID) {
-                std::cerr << "Error: input espera una variable válida\n";
+                std::cerr << "Error: input espera una variable valida\n";
                 exit(1);
             }
 
@@ -405,23 +393,36 @@ Value eval_ast(AST* tree) {
                 exit(1);
             }
 
-            std::cout << "Ingresa valor para " << var << ": ";
+            std::string tipo = variables[var].tipo;
             std::string input;
             std::getline(std::cin, input);
 
             try {
-                if (input.find('.') != std::string::npos) {
-                    float f = std::stof(input);
-                    variables[var] = Value(f);
-                } else {
-                    int i = std::stoi(input);
-                    variables[var] = Value(i);
+                if (tipo == "int") {
+                    size_t pos;
+                    int i = std::stoi(input, &pos);
+                    if (pos != input.size()) throw std::invalid_argument("No es int valido");
+                    variables[var].valor = Value(i);
                 }
-            } catch (...) {
-                variables[var] = Value(input);
+                else if (tipo == "float") {
+                    size_t pos;
+                    float f = std::stof(input, &pos);
+                    if (pos != input.size()) throw std::invalid_argument("No es float valido");
+                    variables[var].valor = Value(f);
+                }
+                else if (tipo == "string") {
+                    variables[var].valor = Value(input);
+                }
+                else {
+                    std::cerr << "Tipo desconocido para variable " << var << "\n";
+                    exit(1);
+                }
+            } catch (std::exception& e) {
+                std::cerr << "Error: entrada invalida para tipo " << tipo << "\n";
+                exit(1);
             }
 
-            return variables[var];
+            return variables[var].valor;
         }
 
 
@@ -429,7 +430,6 @@ Value eval_ast(AST* tree) {
             eval_ast(tree->data.seq.first);
             return eval_ast(tree->data.seq.second);
         }
-
         case NODE_FUNC_DEF: {
             std::vector<std::string> names;
             if (tree->data.func_def.params && tree->data.func_def.params->data.params.names)
@@ -448,17 +448,26 @@ Value eval_ast(AST* tree) {
 
                 for (size_t i = 0; i < param_names.size(); ++i) {
                     Value val = (i < args.size()) ? eval_ast(args[i]) : Value();
-                    variables[param_names[i]] = val;
+                    VarInfo varinfo;
+                    // Asignar tipo segun tipo del valor
+                    if (val.type == Value::INT) varinfo.tipo = "int";
+                    else if (val.type == Value::FLOAT) varinfo.tipo = "float";
+                    else if (val.type == Value::STRING) varinfo.tipo = "string";
+                    else varinfo.tipo = "unknown"; // o "" para manejar
+
+                    varinfo.valor = val;
+                    variables[param_names[i]] = varinfo;
                 }
 
                 Value result = eval_ast(body);
-                variables = saved_vars;
+                variables = saved_vars; // restaura variables
                 return result;
             } else {
-                std::cerr << "Error: función '" << tree->data.func_call.name << "' no definida.\n";
+                std::cerr << "Error: funcion '" << tree->data.func_call.name << "' no definida.\n";
                 return Value();
             }
         }
+
         case NODE_RETURN: {
             return eval_ast(tree->data.ret.expr);
         }

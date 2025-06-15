@@ -48,7 +48,7 @@
 "*"                    return '*';
 "/"                    return '/';
 "//".*                 ;
-[ \t\r\n]+             ;  // ignorar espacios y saltos de línea
+[ \t\r\n]+             ;  // ignorar espacios y saltos de linea
 
 .                      { return yytext[0]; }
 

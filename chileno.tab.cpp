@@ -79,11 +79,11 @@
 #include "ast.h"
 
 extern int yylex();
-void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; }
+void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; exit(1); }
 extern FILE* yyin;
 AST* tree;
 
-std::map<std::string, bool> tabla_simbolos;  // Guardar variables declaradas
+std::map<std::string, bool> tabla_simbolos;  // Guarda variables declaradas
 
 
 /* Line 189 of yacc.c  */
@@ -1583,8 +1583,8 @@ yyreduce:
 #line 66 "chileno.y"
     { 
                                     if (tabla_simbolos.count((yyvsp[(2) - (3)].strval)) == 0) {
-                                    std::cerr << "Error: variable '" << (yyvsp[(2) - (3)].strval) << "' no declarada para input\n";
-                                    exit(1);
+                                        std::cerr << "Error: variable '" << (yyvsp[(2) - (3)].strval) << "' no declarada para input\n";
+                                        exit(1);
                                     }
                                     (yyval.ast) = make_input(make_id((yyvsp[(2) - (3)].strval))); 
                                  ;}
@@ -2115,12 +2115,13 @@ int main(int argc, char** argv) {
     }
 
     if (yyparse() == 0) {
-        std::cout << "--- Árbol de sintaxis generado ---\n";
-        print_ast(tree, 0); 
-        std::cout << "\n--- Ejecución del programa ---\n";
+        std::cout << "--- Arbol de sintaxis generado ---\n";
+        print_ast(tree, 0);
+        std::cout << "\n--- Ejecucion del programa ---\n";
         eval_ast(tree);
     } else {
         std::cerr << "Error durante el parseo.\n";
+        return 1;
     }
 
     return 0;

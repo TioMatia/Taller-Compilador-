@@ -1,3 +1,7 @@
-int edad;
-lee edad;
-imprime_la_wa(edad);
+pega duplicar(x) {
+  devuelve_la_wa x * 2; 
+}
+
+int a = 5;
+imprime_la_wa("Valor: " +duplicar(a) );
+

@@ -851,7 +851,7 @@ YY_RULE_SETUP
 case 34:
 YY_RULE_SETUP
 #line 51 "chileno.l"
-;  // ignorar espacios y saltos de línea
+;  // ignorar espacios y saltos de linea
 	YY_BREAK
 case 35:
 YY_RULE_SETUP

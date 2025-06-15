@@ -116,7 +116,7 @@ struct AST {
         } decl;
 
         struct {
-            AST* variable; // <-- para input, a qué variable asignar
+            AST* variable; // <-- para input, a que variable asignar
         } input;
     } data;
 };

@@ -14,12 +14,11 @@
 #include "ast.h"
 
 extern int yylex();
-void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; }
+void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; exit(1); }
 extern FILE* yyin;
 AST* tree;
 
-std::map<std::string, bool> tabla_simbolos;  // Guardar variables declaradas
-
+std::map<std::string, bool> tabla_simbolos;  // Guarda variables declaradas
 %}
 
 %union {
@@ -66,8 +65,8 @@ stmt
     | decl ';'                   { $$ = $1; }
     | LEE ID ';'                 { 
                                     if (tabla_simbolos.count($2) == 0) {
-                                    std::cerr << "Error: variable '" << $2 << "' no declarada para input\n";
-                                    exit(1);
+                                        std::cerr << "Error: variable '" << $2 << "' no declarada para input\n";
+                                        exit(1);
                                     }
                                     $$ = make_input(make_id($2)); 
                                  }
@@ -134,7 +133,7 @@ func_def
     ;
 
 param_list
-    : /* vacío */                { $$ = new std::vector<std::string>(); }
+    : /* vacio */                { $$ = new std::vector<std::string>(); }
     | ID                         {
                                   if (tabla_simbolos.count($1)) {
                                     std::cerr << "Error: parametro '" << $1 << "' ya declarado como variable\n";
@@ -191,7 +190,7 @@ func_call
     ;
 
 arg_list
-    : /* vacío */                { $$ = new std::vector<AST*>(); }
+    : /* vacio */                { $$ = new std::vector<AST*>(); }
     | expr                       { $$ = new std::vector<AST*>({$1}); }
     | arg_list ',' expr          { $1->push_back($3); $$ = $1; }
     ;
@@ -213,11 +212,12 @@ int main(int argc, char** argv) {
 
     if (yyparse() == 0) {
         std::cout << "--- Arbol de sintaxis generado ---\n";
-        print_ast(tree, 0); 
+        print_ast(tree, 0);
         std::cout << "\n--- Ejecucion del programa ---\n";
         eval_ast(tree);
     } else {
         std::cerr << "Error durante el parseo.\n";
+        return 1;
     }
 
     return 0;
