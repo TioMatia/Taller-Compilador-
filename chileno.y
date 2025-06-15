@@ -53,7 +53,7 @@ stmt
     | IF '(' expr ')' stmt ELSE stmt
                                  { $$ = make_if($3, $5, $7); }
     | WHILE '(' expr ')' stmt    { $$ = make_while($3, $5); }
-    | FOR '(' expr ';' expr ';' expr ')' stmt  
+    | FOR '(' decl ';' expr ';' expr ')' stmt  
                                  { $$ = make_for($3, $5, $7, $9); }
     | '{' stmts '}'              { $$ = $2; }
     | func_def                   { $$ = $1; }
