@@ -14,9 +14,17 @@
 "pega"                 return FUNCTION;
 "devuelve_la_wa"       return RETURN;
 "=="                   return EQ;
+"!="                   return NEQ;
+"<="                   return LEQ;
+">="                   return GEQ;
+"int"                  return TIPO_INT;
+"float"                return TIPO_FLOAT;
+"string"               return TIPO_STRING;
+[0-9]+\.[0-9]+          { yylval.floatval = atof(yytext); return FLOAT; }     // Flotantes
+[0-9]+                  { yylval.intval = atoi(yytext); return NUM; }         // Enteros
+\"([^\"\\]|\\.)*\"      { yylval.strval = strdup(yytext); return STRING; }    // Cadenas
+[a-zA-Z_][a-zA-Z0-9_]*  { yylval.strval = strdup(yytext); return ID; }        // Identificadores
 
-[0-9]+                 { yylval.intval = atoi(yytext); return NUM; }
-[a-zA-Z_][a-zA-Z0-9_]* { yylval.strval = strdup(yytext); return ID; }
 
 "="                    return '=';
 "("                    return '(';

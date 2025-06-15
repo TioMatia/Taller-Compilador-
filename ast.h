@@ -6,20 +6,22 @@
 
 enum NodeType {
     NODE_INT,
+    NODE_FLOAT,
+    NODE_STRING,
     NODE_ID,
     NODE_ASSIGN,
     NODE_PRINT,
+    NODE_BINOP,
     NODE_IF,
     NODE_WHILE,
     NODE_FOR,
-    NODE_BINOP,
     NODE_SEQ,
     NODE_FUNC_DEF,
     NODE_FUNC_CALL,
-    NODE_RETURN,
     NODE_ARGS,
-    NODE_PARAMS
-    
+    NODE_PARAMS,
+    NODE_RETURN,
+    NODE_DECL
 };
 
 enum BinOp {
@@ -28,17 +30,22 @@ enum BinOp {
     OP_MULT,
     OP_DIV,
     OP_EQ,
+    OP_NEQ,
     OP_LT,
-    OP_GT
+    OP_GT,
+    OP_LEQ,
+    OP_GEQ
 };
 
 struct AST {
     NodeType type;
-    int op; 
+    int op;
 
     union {
         int intval;
-        char* id;
+        char* id;  
+        float floatval;
+        char* strval;  
 
         struct {
             AST* left;
@@ -58,7 +65,7 @@ struct AST {
 
         struct {
             char* name;
-            AST* params; 
+            AST* params;
             AST* body;
         } func_def;
 
@@ -86,11 +93,16 @@ struct AST {
             AST* body;
         } for_loop;
 
+        struct {
+            char* tipo;
+            char* nombre;
+        } decl;
     } data;
 };
 
-
 AST* make_int(int val);
+AST* make_float(float val);
+AST* make_string(const char* val);
 AST* make_id(const char* id);
 AST* make_assign(AST* id, AST* val);
 AST* make_print(AST* expr);
@@ -104,7 +116,7 @@ AST* make_args(std::vector<AST*>* values);
 AST* make_params(std::vector<std::string>* names);
 AST* make_return(AST* expr);
 AST* make_for(AST* init, AST* cond, AST* update, AST* body);
-
+AST* make_decl(const char* tipo, const char* nombre);
 
 void print_ast(AST* tree, int indent = 0);
 int eval_ast(AST* tree);

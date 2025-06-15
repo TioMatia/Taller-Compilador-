@@ -39,7 +39,7 @@
 
   #include <vector>
   #include <string>
-  #include "ast.h"   // acá debe estar la definición de AST
+  #include "ast.h"
 
 
 
@@ -54,14 +54,22 @@
    enum yytokentype {
      NUM = 258,
      ID = 259,
-     IF = 260,
-     ELSE = 261,
-     WHILE = 262,
-     PRINT = 263,
-     FUNCTION = 264,
-     RETURN = 265,
-     EQ = 266,
-     FOR = 267
+     STRING = 260,
+     FLOAT = 261,
+     IF = 262,
+     ELSE = 263,
+     WHILE = 264,
+     PRINT = 265,
+     FUNCTION = 266,
+     RETURN = 267,
+     EQ = 268,
+     FOR = 269,
+     NEQ = 270,
+     LEQ = 271,
+     GEQ = 272,
+     TIPO_INT = 273,
+     TIPO_FLOAT = 274,
+     TIPO_STRING = 275
    };
 #endif
 
@@ -75,6 +83,7 @@ typedef union YYSTYPE
 #line 20 "chileno.y"
 
     int intval;
+    float floatval;
     char* strval;
     AST* ast;
     std::vector<AST*>* astlist;
@@ -83,7 +92,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 87 "chileno.tab.h"
+#line 96 "chileno.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

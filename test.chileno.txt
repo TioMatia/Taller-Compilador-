@@ -1,24 +1,32 @@
-pega cuadrado(x) {
-  devuelve_la_wa x * x;
+pega duplicar(x) {
+  devuelve_la_wa x * 2;
 }
 
+int a;
+a = 5;
+imprime_la_wa(a); 
+
+float b;
+b = 3.14;
+imprime_la_wa(b);  
+
+string saludo;
+saludo = "Hola mundo";
+imprime_la_wa(saludo);  
+
+
+imprime_la_wa(duplicar(a));  
+
+
+int i;
 i = 0;
 mientras_la_wa (i < 3) {
   imprime_la_wa(i);
   i = i + 1;
 }
 
-pa_cada (j = 0; j < 5; j = j + 1) {
-  imprime_la_wa(cuadrado(j));
-}
-
-a = 10;
-b = 5;
 si_po (a > b) {
-  imprime_la_wa(a);
+  imprime_la_wa("a es mayor");
 } si_no {
-  imprime_la_wa(b);
+  imprime_la_wa("b es mayor o igual");
 }
-
-c = a + b;
-imprime_la_wa(c);

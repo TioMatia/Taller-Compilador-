@@ -15,8 +15,11 @@ const char* op_to_str(int op) {
         case OP_MULT: return "*";
         case OP_DIV: return "/";
         case OP_EQ: return "==";
+        case OP_NEQ: return "!=";
         case OP_LT: return "<";
         case OP_GT: return ">";
+        case OP_LEQ: return "<=";
+        case OP_GEQ: return ">=";
         default: return "UNKNOWN_OP";
     }
 }
@@ -135,12 +138,48 @@ AST* make_return(AST* expr) {
     return node;
 }
 
+AST* make_decl(const char* tipo, const char* nombre) {
+    AST* node = new AST();
+    node->type = NODE_DECL;
+    node->data.decl.tipo = strdup(tipo);
+    node->data.decl.nombre = strdup(nombre);
+    return node;
+}
+
+AST* make_string(const char* val) {
+    AST* node = new AST;
+    node->type = NODE_STRING;
+    node->data.strval = strdup(val);  
+    return node;
+}
+
+AST* make_float(float val) {
+    AST* node = new AST;
+    node->type = NODE_FLOAT;
+    node->data.floatval = val;
+    return node;
+}
+
+
 int eval_ast(AST* tree) {
     if (!tree) return 0;
 
     switch (tree->type) {
+        case NODE_DECL: {
+            std::string var = tree->data.decl.nombre;
+            variables[var] = 0;
+            return 0;
+        }
+
         case NODE_INT:
             return tree->data.intval;
+            
+        case NODE_FLOAT:
+            return tree->data.floatval;  
+
+        case NODE_STRING:
+            std::cout << tree->data.strval << std::endl;
+            return 0; 
 
         case NODE_ID:
             return variables[tree->data.id];
@@ -163,12 +202,15 @@ int eval_ast(AST* tree) {
             int rhs = eval_ast(tree->data.bin.right);
             switch (tree->op) {
                 case OP_EQ: return lhs == rhs;
+                case OP_NEQ: return lhs != rhs;
+                case OP_LT: return lhs < rhs;
+                case OP_LEQ: return lhs <= rhs;
+                case OP_GT: return lhs > rhs;
+                case OP_GEQ: return lhs >= rhs;
                 case OP_PLUS: return lhs + rhs;
                 case OP_MINUS: return lhs - rhs;
                 case OP_MULT: return lhs * rhs;
                 case OP_DIV: return rhs != 0 ? lhs / rhs : 0;
-                case OP_LT: return lhs < rhs;
-                case OP_GT: return lhs > rhs;
                 default: return 0;
             }
         }
@@ -332,9 +374,21 @@ void print_ast(AST* tree, int indent) {
             }
             break;
 
+        case NODE_DECL:
+            std::cout << "DECLARACION: " << tree->data.decl.nombre 
+                    << " Tipo: " << tree->data.decl.tipo << "\n";
+            break;
+            
         case NODE_RETURN:
             std::cout << "RETURN\n";
             print_ast(tree->data.ret.expr, indent + 1);
+            break;
+        case NODE_FLOAT:
+            std::cout << "FLOAT: " << tree->data.floatval << "\n";
+            break;
+
+        case NODE_STRING:
+            std::cout << "STRING: " << tree->data.strval << "\n";
             break;
 
         default:
