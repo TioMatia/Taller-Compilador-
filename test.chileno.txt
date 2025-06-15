@@ -1,7 +1,4 @@
-pega duplicar(x) {
-  devuelve_la_wa x * 2; 
-}
-
-int a = 5;
-imprime_la_wa("Valor: " +duplicar(a) );
-
+int edad;
+imprime_la_wa("Escribe tu edad: ");
+lee edad;
+imprime_la_wa("Tu edad es: "+ edad);

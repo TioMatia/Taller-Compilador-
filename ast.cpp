@@ -589,7 +589,10 @@ void print_ast(AST* tree, int indent) {
         case NODE_STRING:
             std::cout << "STRING: " << tree->data.strval << "\n";
             break;
-
+        case NODE_INPUT:
+            std::cout << "INPUT\n";
+            print_ast(tree->data.input.variable, indent + 1);
+            break;
         default:
             std::cout << "Nodo desconocido\n";
     }
