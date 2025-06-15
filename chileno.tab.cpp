@@ -481,9 +481,9 @@ static const yytype_uint8 yyrline[] =
 {
        0,    41,    41,    45,    46,    50,    51,    52,    53,    55,
       56,    58,    59,    60,    61,    65,    66,    67,    68,    69,
-      70,    74,    78,    83,    84,    85,    89,    90,    91,    92,
-      93,    94,    95,    96,    97,    98,    99,   100,   101,   102,
-     103,   104,   105,   109,   113,   114,   115
+      70,    75,    79,    84,    85,    86,    90,    91,    92,    93,
+      94,    95,    96,    97,    98,    99,   100,   101,   102,   103,
+     104,   105,   106,   110,   114,   115,   116
 };
 #endif
 
@@ -1591,7 +1591,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 66 "chileno.y"
-    { (yyval.ast) = make_decl("int", (yyvsp[(2) - (4)].strval)); (yyval.ast) = make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast)); ;}
+    { (yyval.ast) = make_seq(make_decl("int", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast))); ;}
     break;
 
   case 17:
@@ -1605,7 +1605,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 68 "chileno.y"
-    { (yyval.ast) = make_decl("float", (yyvsp[(2) - (4)].strval)); (yyval.ast) = make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast)); ;}
+    { (yyval.ast) = make_seq(make_decl("float", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast))); ;}
     break;
 
   case 19:
@@ -1619,188 +1619,188 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 70 "chileno.y"
-    { (yyval.ast) = make_decl("string", (yyvsp[(2) - (4)].strval)); (yyval.ast) = make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast)); ;}
+    { (yyval.ast) = make_seq(make_decl("string", (yyvsp[(2) - (4)].strval)), make_assign(make_id((yyvsp[(2) - (4)].strval)), (yyvsp[(4) - (4)].ast))); ;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 74 "chileno.y"
+#line 75 "chileno.y"
     { (yyval.ast) = make_return((yyvsp[(2) - (3)].ast)); ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 79 "chileno.y"
+#line 80 "chileno.y"
     { (yyval.ast) = make_func_def((yyvsp[(2) - (8)].strval), make_params((yyvsp[(4) - (8)].strlist)), (yyvsp[(7) - (8)].ast)); ;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 83 "chileno.y"
+#line 84 "chileno.y"
     { (yyval.strlist) = new std::vector<std::string>(); ;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 84 "chileno.y"
+#line 85 "chileno.y"
     { (yyval.strlist) = new std::vector<std::string>({(yyvsp[(1) - (1)].strval)}); ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 85 "chileno.y"
+#line 86 "chileno.y"
     { (yyvsp[(1) - (3)].strlist)->push_back((yyvsp[(3) - (3)].strval)); (yyval.strlist) = (yyvsp[(1) - (3)].strlist); ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 89 "chileno.y"
+#line 90 "chileno.y"
     { (yyval.ast) = make_int((yyvsp[(1) - (1)].intval)); ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 90 "chileno.y"
+#line 91 "chileno.y"
     { (yyval.ast) = make_float((yyvsp[(1) - (1)].floatval)); ;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 91 "chileno.y"
+#line 92 "chileno.y"
     { (yyval.ast) = make_string((yyvsp[(1) - (1)].strval)); ;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 92 "chileno.y"
+#line 93 "chileno.y"
     { (yyval.ast) = make_id((yyvsp[(1) - (1)].strval)); ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 93 "chileno.y"
+#line 94 "chileno.y"
     { (yyval.ast) = make_binop(OP_PLUS, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 94 "chileno.y"
+#line 95 "chileno.y"
     { (yyval.ast) = make_binop(OP_MINUS, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 95 "chileno.y"
+#line 96 "chileno.y"
     { (yyval.ast) = make_binop(OP_MULT, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 96 "chileno.y"
+#line 97 "chileno.y"
     { (yyval.ast) = make_binop(OP_DIV, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 97 "chileno.y"
+#line 98 "chileno.y"
     { (yyval.ast) = make_binop(OP_EQ, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 98 "chileno.y"
+#line 99 "chileno.y"
     { (yyval.ast) = make_binop(OP_LT, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 99 "chileno.y"
+#line 100 "chileno.y"
     { (yyval.ast) = make_binop(OP_GT, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 100 "chileno.y"
+#line 101 "chileno.y"
     { (yyval.ast) = make_binop(OP_NEQ, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 101 "chileno.y"
+#line 102 "chileno.y"
     { (yyval.ast) = make_binop(OP_LEQ, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 102 "chileno.y"
+#line 103 "chileno.y"
     { (yyval.ast) = make_binop(OP_GEQ, (yyvsp[(1) - (3)].ast), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 103 "chileno.y"
+#line 104 "chileno.y"
     { (yyval.ast) = make_assign(make_id((yyvsp[(1) - (3)].strval)), (yyvsp[(3) - (3)].ast)); ;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 104 "chileno.y"
+#line 105 "chileno.y"
     { (yyval.ast) = (yyvsp[(1) - (1)].ast); ;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 105 "chileno.y"
+#line 106 "chileno.y"
     { (yyval.ast) = (yyvsp[(2) - (3)].ast); ;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 109 "chileno.y"
+#line 110 "chileno.y"
     { (yyval.ast) = make_func_call((yyvsp[(1) - (4)].strval), make_args((yyvsp[(3) - (4)].astlist))); ;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 113 "chileno.y"
+#line 114 "chileno.y"
     { (yyval.astlist) = new std::vector<AST*>(); ;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 114 "chileno.y"
+#line 115 "chileno.y"
     { (yyval.astlist) = new std::vector<AST*>({(yyvsp[(1) - (1)].ast)}); ;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 115 "chileno.y"
+#line 116 "chileno.y"
     { (yyvsp[(1) - (3)].astlist)->push_back((yyvsp[(3) - (3)].ast)); (yyval.astlist) = (yyvsp[(1) - (3)].astlist); ;}
     break;
 
@@ -2019,7 +2019,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 118 "chileno.y"
+#line 119 "chileno.y"
 
 
 int main() {

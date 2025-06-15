@@ -4,8 +4,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <variant>
 
-std::map<std::string, int> variables;
+std::map<std::string, Value> variables;
 static std::map<std::string, std::pair<AST*, std::vector<std::string>>> funciones;
 
 const char* op_to_str(int op) {
@@ -24,10 +25,12 @@ const char* op_to_str(int op) {
     }
 }
 
+
 AST* make_int(int val) {
     AST* node = new AST;
     node->type = NODE_INT;
     node->data.intval = val;
+    node->value = val;    
     return node;
 }
 
@@ -35,6 +38,7 @@ AST* make_id(const char* id) {
     AST* node = new AST;
     node->type = NODE_ID;
     node->data.id = strdup(id);
+    node->value = 0; 
     return node;
 }
 
@@ -149,7 +153,8 @@ AST* make_decl(const char* tipo, const char* nombre) {
 AST* make_string(const char* val) {
     AST* node = new AST;
     node->type = NODE_STRING;
-    node->data.strval = strdup(val);  
+    node->data.strval = strdup(val);
+    node->value = 0; 
     return node;
 }
 
@@ -157,123 +162,254 @@ AST* make_float(float val) {
     AST* node = new AST;
     node->type = NODE_FLOAT;
     node->data.floatval = val;
+    node->value = val;    
     return node;
 }
 
 
-int eval_ast(AST* tree) {
-    if (!tree) return 0;
+Value eval_ast(AST* tree) {
+    if (!tree) return Value();
 
     switch (tree->type) {
         case NODE_DECL: {
             std::string var = tree->data.decl.nombre;
-            variables[var] = 0;
-            return 0;
+            variables[var] = Value(); // Variable declarada sin valor (NONE)
+            tree->value = 0;
+            return Value();
         }
-
-        case NODE_INT:
-            return tree->data.intval;
-            
-        case NODE_FLOAT:
-            return tree->data.floatval;  
-
-        case NODE_STRING:
-            std::cout << tree->data.strval << std::endl;
-            return 0; 
-
-        case NODE_ID:
-            return variables[tree->data.id];
-
+        case NODE_INT: {
+            Value v(tree->data.intval);
+            tree->value = 0; // Este campo ya no se usa
+            return v;
+        }
+        case NODE_FLOAT: {
+            Value v(tree->data.floatval);
+            tree->value = 0;
+            return v;
+        }
+        case NODE_STRING: {
+            Value v(std::string(tree->data.strval));
+            tree->value = 0;
+            return v;
+        }
+        case NODE_ID: {
+            std::string var = tree->data.id;
+            if (variables.count(var))
+                return variables[var];
+            else {
+                std::cerr << "Variable no definida: " << var << "\n";
+                return Value();
+            }
+        }
         case NODE_ASSIGN: {
             std::string var = tree->data.bin.left->data.id;
-            int val = eval_ast(tree->data.bin.right);
+            Value val = eval_ast(tree->data.bin.right);
             variables[var] = val;
             return val;
         }
-
         case NODE_PRINT: {
-            int val = eval_ast(tree->data.bin.left);
-            std::cout << val << std::endl;
-            return 0;
+            Value val = eval_ast(tree->data.bin.left);
+            switch (val.type) {
+                case Value::INT: std::cout << val.asInt(); break;
+                case Value::FLOAT: std::cout << val.asFloat(); break;
+                case Value::STRING: std::cout << val.asString(); break;
+                default: std::cout << "null";
+            }
+            std::cout << std::endl;
+            return Value();
         }
-
         case NODE_BINOP: {
-            int lhs = eval_ast(tree->data.bin.left);
-            int rhs = eval_ast(tree->data.bin.right);
+            Value lhs = eval_ast(tree->data.bin.left);
+            Value rhs = eval_ast(tree->data.bin.right);
+
             switch (tree->op) {
-                case OP_EQ: return lhs == rhs;
-                case OP_NEQ: return lhs != rhs;
-                case OP_LT: return lhs < rhs;
-                case OP_LEQ: return lhs <= rhs;
-                case OP_GT: return lhs > rhs;
-                case OP_GEQ: return lhs >= rhs;
-                case OP_PLUS: return lhs + rhs;
-                case OP_MINUS: return lhs - rhs;
-                case OP_MULT: return lhs * rhs;
-                case OP_DIV: return rhs != 0 ? lhs / rhs : 0;
-                default: return 0;
+                case OP_PLUS: {
+                    if (lhs.type == Value::STRING || rhs.type == Value::STRING) {
+                        std::string s1 = (lhs.type == Value::STRING) ? lhs.asString() :
+                                        (lhs.type == Value::INT) ? std::to_string(lhs.asInt()) :
+                                        (lhs.type == Value::FLOAT) ? std::to_string(lhs.asFloat()) :
+                                        "";
+
+                        std::string s2;
+                        if (rhs.type == Value::STRING) {
+                            s2 = rhs.asString();
+                        } else if (rhs.type == Value::INT) {
+                            s2 = std::to_string(rhs.asInt());
+                        } else if (rhs.type == Value::FLOAT) {
+                            s2 = std::to_string(rhs.asFloat());
+                        } else {
+                            std::cerr << "Error: No se puede convertir RHS a string\n";
+                            return Value();
+                        }
+
+                        return Value(s1 + s2);
+                    } else if ((lhs.type == Value::INT || lhs.type == Value::FLOAT) &&
+                            (rhs.type == Value::INT || rhs.type == Value::FLOAT)) {
+                        float res = (lhs.type == Value::FLOAT ? lhs.asFloat() : lhs.asInt()) +
+                                    (rhs.type == Value::FLOAT ? rhs.asFloat() : rhs.asInt());
+                        if (lhs.type == Value::INT && rhs.type == Value::INT && (int)res == res)
+                            return Value((int)res);
+                        else
+                            return Value(res);
+                    } else {
+                        std::cerr << "Error: Operacion suma no soportada para estos tipos\n";
+                        return Value();
+                    }
+                }
+                case OP_MINUS:
+                case OP_MULT:
+                case OP_DIV: {
+                    
+                    if (!((lhs.type == Value::INT || lhs.type == Value::FLOAT) &&
+                        (rhs.type == Value::INT || rhs.type == Value::FLOAT))) {
+                        std::cerr << "Error: Operacion aritmética no soportada para estos tipos\n";
+                        return Value();
+                    }
+
+                    float l = (lhs.type == Value::FLOAT) ? lhs.asFloat() : lhs.asInt();
+                    float r = (rhs.type == Value::FLOAT) ? rhs.asFloat() : rhs.asInt();
+                    float res = 0;
+                    switch (tree->op) {
+                        case OP_MINUS: res = l - r; break;
+                        case OP_MULT:  res = l * r; break;
+                        case OP_DIV:   res = (r != 0) ? (l / r) : 0; break;
+                    }
+                    if (lhs.type == Value::INT && rhs.type == Value::INT && (int)res == res)
+                        return Value((int)res);
+                    else
+                        return Value(res);
+                }
+                
+                case OP_EQ:
+                case OP_NEQ: {
+                    // Comparación general usando la variante directamente
+                    bool result = (tree->op == OP_EQ) ? (lhs.val == rhs.val) : (lhs.val != rhs.val);
+                    return Value(result ? 1 : 0);
+                }
+                case OP_LT:
+                case OP_LEQ:
+                case OP_GT:
+                case OP_GEQ: {
+                    // Comparaciones sólo permitidas entre INT o FLOAT
+                    if ((lhs.type == Value::INT || lhs.type == Value::FLOAT) &&
+                        (rhs.type == Value::INT || rhs.type == Value::FLOAT)) {
+                        
+                        float l = (lhs.type == Value::FLOAT) ? lhs.asFloat() : lhs.asInt();
+                        float r = (rhs.type == Value::FLOAT) ? rhs.asFloat() : rhs.asInt();
+                        bool result = false;
+
+                        switch (tree->op) {
+                            case OP_LT:  result = l < r; break;
+                            case OP_LEQ: result = l <= r; break;
+                            case OP_GT:  result = l > r; break;
+                            case OP_GEQ: result = l >= r; break;
+                            default: break;
+                        }
+
+                        return Value(result ? 1 : 0);
+                    } else {
+                        std::cerr << "Error: Comparación no soportada para estos tipos\n";
+                        return Value();
+                    }
+                }
+
+                default:
+                    return Value();
             }
         }
-
         case NODE_IF: {
-            if (eval_ast(tree->data.ctrl.cond))
+            Value cond = eval_ast(tree->data.ctrl.cond);
+            bool cond_true = false;
+            if (cond.type == Value::INT)
+                cond_true = cond.asInt() != 0;
+            else if (cond.type == Value::FLOAT)
+                cond_true = cond.asFloat() != 0.0f;
+            else
+                cond_true = false;
+
+            if (cond_true)
                 return eval_ast(tree->data.ctrl.then_branch);
             else if (tree->data.ctrl.else_branch)
                 return eval_ast(tree->data.ctrl.else_branch);
-            return 0;
+            else
+                return Value();
         }
-
         case NODE_WHILE: {
-            while (eval_ast(tree->data.ctrl.cond))
-                eval_ast(tree->data.ctrl.then_branch);
-            return 0;
-        }
+            while (true) {
+                Value cond = eval_ast(tree->data.ctrl.cond);
+                bool cond_true = false;
+                if (cond.type == Value::INT)
+                    cond_true = cond.asInt() != 0;
+                else if (cond.type == Value::FLOAT)
+                    cond_true = cond.asFloat() != 0.0f;
+                else
+                    cond_true = false;
 
+                if (!cond_true)
+                    break;
+
+                eval_ast(tree->data.ctrl.then_branch);
+            }
+            return Value();
+        }
         case NODE_FOR: {
             eval_ast(tree->data.for_loop.init);
-            while (eval_ast(tree->data.for_loop.cond)) {
+            while (true) {
+                Value cond = eval_ast(tree->data.for_loop.cond);
+                bool cond_true = false;
+                if (cond.type == Value::INT)
+                    cond_true = cond.asInt() != 0;
+                else if (cond.type == Value::FLOAT)
+                    cond_true = cond.asFloat() != 0.0f;
+                else
+                    cond_true = false;
+
+                if (!cond_true)
+                    break;
+
                 eval_ast(tree->data.for_loop.body);
                 eval_ast(tree->data.for_loop.update);
             }
-            return 0;
+            return Value();
         }
-
-        case NODE_SEQ:
+        case NODE_SEQ: {
             eval_ast(tree->data.seq.first);
             return eval_ast(tree->data.seq.second);
-
-        case NODE_FUNC_DEF: {
-            std::vector<std::string>* names = tree->data.func_def.params ? tree->data.func_def.params->data.params.names : new std::vector<std::string>();
-            funciones[tree->data.func_def.name] = {tree->data.func_def.body, *names};
-            return 0;
         }
-
+        case NODE_FUNC_DEF: {
+            std::vector<std::string> names;
+            if (tree->data.func_def.params && tree->data.func_def.params->data.params.names)
+                names = *(tree->data.func_def.params->data.params.names);
+            funciones[tree->data.func_def.name] = {tree->data.func_def.body, names};
+            return Value();
+        }
         case NODE_FUNC_CALL: {
             if (funciones.count(tree->data.func_call.name)) {
                 auto [body, param_names] = funciones[tree->data.func_call.name];
-                std::map<std::string, int> saved_vars = variables;
+                auto saved_vars = variables;
 
-                std::vector<AST*>* args = tree->data.func_call.args ? tree->data.func_call.args->data.args.values : new std::vector<AST*>();
+                std::vector<AST*> args;
+                if (tree->data.func_call.args && tree->data.func_call.args->data.args.values)
+                    args = *(tree->data.func_call.args->data.args.values);
 
                 for (size_t i = 0; i < param_names.size(); ++i) {
-                    int val = i < args->size() ? eval_ast((*args)[i]) : 0;
+                    Value val = (i < args.size()) ? eval_ast(args[i]) : Value();
                     variables[param_names[i]] = val;
                 }
 
-                int result = eval_ast(body);
+                Value result = eval_ast(body);
                 variables = saved_vars;
                 return result;
             } else {
                 std::cerr << "Error: función '" << tree->data.func_call.name << "' no definida.\n";
-                return 0;
+                return Value();
             }
         }
-
-        case NODE_RETURN:
+        case NODE_RETURN: {
             return eval_ast(tree->data.ret.expr);
-
+        }
         default:
-            return 0;
+            return Value();
     }
 }
 

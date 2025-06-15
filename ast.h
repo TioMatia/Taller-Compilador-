@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <variant>
 
 enum NodeType {
     NODE_INT,
@@ -36,10 +37,25 @@ enum BinOp {
     OP_LEQ,
     OP_GEQ
 };
+struct Value {
+    enum Type { INT, FLOAT, STRING, NONE } type;
+    std::variant<int, float, std::string> val;
+
+    Value() : type(NONE) {}
+    Value(int v) : type(INT), val(v) {}
+    Value(float v) : type(FLOAT), val(v) {}
+    Value(const std::string& v) : type(STRING), val(v) {}
+
+    int asInt() const { return std::get<int>(val); }
+    float asFloat() const { return std::get<float>(val); }
+    std::string asString() const { return std::get<std::string>(val); }
+};
 
 struct AST {
     NodeType type;
     int op;
+    
+    double value;  
 
     union {
         int intval;
@@ -100,6 +116,8 @@ struct AST {
     } data;
 };
 
+
+
 AST* make_int(int val);
 AST* make_float(float val);
 AST* make_string(const char* val);
@@ -119,6 +137,6 @@ AST* make_for(AST* init, AST* cond, AST* update, AST* body);
 AST* make_decl(const char* tipo, const char* nombre);
 
 void print_ast(AST* tree, int indent = 0);
-int eval_ast(AST* tree);
+Value eval_ast(AST* tree);
 
 #endif

@@ -63,12 +63,13 @@ stmt
 
 decl
     : TIPO_INT ID                { $$ = make_decl("int", $2); }
-    | TIPO_INT ID '=' expr       { $$ = make_decl("int", $2); $$ = make_assign(make_id($2), $4); }
+    | TIPO_INT ID '=' expr       { $$ = make_seq(make_decl("int", $2), make_assign(make_id($2), $4)); }
     | TIPO_FLOAT ID              { $$ = make_decl("float", $2); }
-    | TIPO_FLOAT ID '=' expr     { $$ = make_decl("float", $2); $$ = make_assign(make_id($2), $4); }
+    | TIPO_FLOAT ID '=' expr     { $$ = make_seq(make_decl("float", $2), make_assign(make_id($2), $4)); }
     | TIPO_STRING ID             { $$ = make_decl("string", $2); }
-    | TIPO_STRING ID '=' expr    { $$ = make_decl("string", $2); $$ = make_assign(make_id($2), $4); }
+    | TIPO_STRING ID '=' expr    { $$ = make_seq(make_decl("string", $2), make_assign(make_id($2), $4)); }
     ;
+
 
 return_stmt
     : RETURN expr ';'            { $$ = make_return($2); }
