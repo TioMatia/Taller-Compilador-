@@ -1,0 +1,110 @@
+hace_la_pega suma(suma_a, suma_b) {
+    suelta_la_wa("------------------");
+    numerito_con_punto sumaResultado = suma_a + suma_b;
+    suelta_la_wa("Resultado suma: "+ sumaResultado);
+    suelta_la_wa("------------------");
+
+}
+
+hace_la_pega resta(resta_a,resta_b) {
+    suelta_la_wa("------------------");
+    numerito_con_punto restaResultado = resta_a - resta_b;
+    suelta_la_wa("Resultado resta: "+ restaResultado);
+    suelta_la_wa("------------------");
+}
+
+hace_la_pega multiplicacion(multiplicacion_a,multiplicacion_b) {
+    suelta_la_wa("------------------");
+    numerito_con_punto multiplicacionResultado = multiplicacion_a * multiplicacion_b;
+    suelta_la_wa("Resultado multiplicacion: "+ multiplicacionResultado);
+    suelta_la_wa("------------------");
+}
+
+hace_la_pega division(division_a, division_b) {
+    suelta_la_wa("------------------");
+    numerito_con_punto divisionResultado = division_a / division_b;
+    suelta_la_wa("Resultado division: "+ divisionResultado);
+    suelta_la_wa("------------------");
+}
+
+hace_la_pega potencia(base, exponente) {
+    numerito resultado = 1;
+    numerito i = 0;
+    mientras_la_wa (i < exponente) {
+        resultado = resultado * base;
+        i = i + 1;
+    }
+    suelta_la_wa("------------------");
+    suelta_la_wa("Resultado de base "+base+" Exponente: "+exponente+": "+resultado);
+    suelta_la_wa("------------------");
+}
+
+//Declaracion de variables:
+numerito_con_punto numeroSuma1;
+numerito_con_punto numeroSuma2;
+
+numerito_con_punto numeroResta1;
+numerito_con_punto numeroResta2;
+
+numerito_con_punto numeroMultiplicacion1;
+numerito_con_punto numeroMultiplicacion2;
+
+numerito_con_punto numeroDivision1;
+numerito_con_punto numeroDivision2;
+
+numerito numeroBase;
+numerito numeroExponente;
+
+numerito opcion = 999;
+
+suelta_la_wa("-------Calculadora------");
+
+mientras_la_wa(opcion igualitont 0){
+    suelta_la_wa("1- Sumar 2 numeros");
+    suelta_la_wa("2- Restar 2 numeros");
+    suelta_la_wa("3- Dividir 2 numeros");
+    suelta_la_wa("4- Multiplicar 2 numeros");
+    suelta_la_wa("5- Obtener el exponente de un numero x sobre uno y");
+    suelta_la_wa("0- Salir");
+    suelta_la_wa("Digite una opcion: ");
+    lee_la_wa opcion;
+
+    si_po(opcion igualito 1){
+        suelta_la_wa("Digite el primer digito: ");
+        lee_la_wa numeroSuma1;
+        suelta_la_wa("Digite el segundo digito: ");
+        lee_la_wa numeroSuma2;
+        suma(numeroSuma1,numeroSuma2);
+
+    }si_po(opcion igualito 2){
+        suelta_la_wa("Digite el primer digito: ");
+        lee_la_wa numeroResta1;
+        suelta_la_wa("Digite el segundo digito: ");
+        lee_la_wa numeroResta2;
+        resta(numeroResta1,numeroResta2);
+    }
+
+    si_po(opcion igualito 3){
+        suelta_la_wa("Digite el primer digito: ");
+        lee_la_wa numeroMultiplicacion1;
+        suelta_la_wa("Digite el segundo digito: ");
+        lee_la_wa numeroMultiplicacion2;
+        multiplicacion(numeroMultiplicacion1,numeroMultiplicacion2);
+    }
+
+    si_po(opcion igualito 4){
+        suelta_la_wa("Digite el primer digito: ");
+        lee_la_wa numeroDivision1;
+        suelta_la_wa("Digite el segundo digito: ");
+        lee_la_wa numeroDivision2;
+        division(numeroDivision1,numeroDivision2);
+    }
+
+        si_po(opcion igualito 5 ){
+        suelta_la_wa("Digite el primer digito (base): ");
+        lee_la_wa numeroBase;
+        suelta_la_wa("Digite el segundo digito (exponente): ");
+        lee_la_wa numeroExponente;
+        potencia(numeroBase,numeroExponente);
+    }
+}
