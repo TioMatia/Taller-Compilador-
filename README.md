@@ -155,7 +155,7 @@ Ejecuta el comando requerido para el test ha probar.
 ### ¿Que muestra por pantalla?
 ```
 Primero imprime el arbol de sintaxis abstracta.
-Luego imprime lo que ejecuta el programa
+Luego imprime lo que ejecuta el programa.
 Finalmente imprime que se ha generado el codigo en c++.
 ```
 #### Ejemplo
