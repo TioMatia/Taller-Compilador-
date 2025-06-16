@@ -1,10 +1,7 @@
 %{
+#include "chileno.tab.h"
 #include <cstdlib>
 #include <cstring>
-#include "ast.h"
-#include "chileno.tab.h"
-
-
 %}
 
 %%
@@ -13,22 +10,50 @@
 "si_no"                return ELSE;
 "mientras_la_wa"       return WHILE;
 "pa_cada"              return FOR;
+"imprime_la_wa"        return PRINT;
 "pega"                 return FUNCTION;
 "devuelve_la_wa"       return RETURN;
-"numerito"             return TYPE_INT;
-"muestra_la_wa"        return PRINT;
-"pide_la_wa"           return READ;
-"es"                   return ASSIGN;
-"igualito"             return EQ;
+"=="                   return EQ;
+"!="                   return NEQ;
+"<="                   return LEQ;
+">="                   return GEQ;
+"numerito"             return TIPO_INT;
+"float"                return TIPO_FLOAT;
+"string"               return TIPO_STRING;
+"lee"                  return LEE;
+[0-9]+\.[0-9]+          { yylval.floatval = atof(yytext); return FLOAT; }     // Flotantes
+[0-9]+                  { yylval.intval = atoi(yytext); return NUM; }         // Enteros
+\"([^\"\\]|\\.)*\"      {
+                            int len = yyleng - 2; // largo sin las comillas
+                            char* str = (char*)malloc(len + 1);
+                            strncpy(str, yytext + 1, len);                     //Cadenas
+                            str[len] = '\0';
+                            yylval.strval = str;
+                            return STRING;
+                        }
+[a-zA-Z_][a-zA-Z0-9_]*  { yylval.strval = strdup(yytext); return ID; }        // Identificadores
 
-[0-9]+                 { yylval.intval = atoi(yytext); return NUMBER; }
-[a-zA-Z_][a-zA-Z0-9_]* { yylval.id = strdup(yytext); return IDENTIFIER; }
 
-[ \t\n]+               ; // ignorar espacios
-.                      return *yytext;
+"="                    return '=';
+"("                    return '(';
+")"                    return ')';
+"{"                    return '{';
+"}"                    return '}';
+","                    return ',';
+";"                    return ';';
+"<"                    return '<';
+">"                    return '>';
+"+"                    return '+';
+"-"                    return '-';
+"*"                    return '*';
+"/"                    return '/';
+"//".*                 ;
+[ \t\r\n]+             ;  // ignorar espacios y saltos de linea
+
+.                      { return yytext[0]; }
 
 %%
 
-extern "C" int yywrap() {
+int yywrap() {
     return 1;
 }
