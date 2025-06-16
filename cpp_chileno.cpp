@@ -2,40 +2,37 @@
 #include <string>
 using namespace std;
 
-auto duplicar(auto x) {
-return (x * 2);
-}
-
-auto es_par(auto n) {
-if ((n * (2 == 0))) {
-cout << "Es par" << endl;
+auto factorial(auto n) {
+if ((n == 0)) {
+return 1;
 }
 else {
-cout << "Es impar" << endl;
+return 0;
 }
 }
 
 int main() {
-int a;
-float b;
-string saludo;
-a = 10;
-b = 3.140000;
-saludo = "Hola Mundo";
-cout << saludo << endl;
-cin >> a;
-cout << "El doble es: " << duplicar(a);
- << endl;
-es_par(a);
-while ((a > 0)) {
-cout << a << endl;
-a = (a - 1);
+int numero;
+int resultado;
+string mensaje;
+cout << "Ingrese un número para calcular su factorial:";
+cin >> numero;
+resultado = factorial(numero);
+;
+if ((resultado > 1000)) {
+mensaje = "El factorial es muy grande";
 }
-for (int i;
-i = 0;
-; (i < 5); i = (i + 1);
-) {
-cout << i << endl;
+else {
+mensaje = "El factorial es: ";
+}
+cout << mensaje;
+cout << resultado;
+for (int i = 0; (i < 5); i = (i + 1)) {
+cout << "Contador: " << i;
+}
+while ((numero > 0)) {
+cout << numero;
+numero = (numero - 1);
 }
 return 0;
 }

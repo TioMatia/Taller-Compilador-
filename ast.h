@@ -146,8 +146,7 @@ Value eval_ast(AST* tree);
 
 // Nuevas funciones para generación de código
 std::string generar_programa(AST* tree);          // Genera el archivo completo (void, escribe archivo)
-std::string generate_code(AST* tree);        // Genera el cuerpo del programa en string
-std::string generate_header();                // Genera encabezado .cpp (includes, main, etc)
-std::string generate_footer();                // Genera footer (cierre de main y archivo)
-
+std::string generate_code_funcs(AST* tree);
+std::string generate_print_expr(AST* expr);
+std::string generate_code_main(AST* tree, bool in_for_header = false);
 #endif

@@ -597,9 +597,6 @@ void print_ast(AST* tree, int indent) {
             std::cout << "Nodo desconocido\n";
     }
 }
-std::string generate_code_funcs(AST* tree);
-std::string generate_code_main(AST* tree);
-std::string generate_print_expr(AST* expr);
 
 std::string generar_programa(AST* tree) {
     std::string codigo = "#include <iostream>\n#include <string>\nusing namespace std;\n\n";
@@ -650,59 +647,54 @@ std::string generate_code_funcs(AST* tree) {
     return codigo;
 }
 
-std::string generate_code_main(AST* tree) {
+std::string generate_code_main(AST* tree, bool in_for_header) {
     if (!tree) return "";
 
     switch (tree->type) {
         case NODE_FUNC_DEF:
             return "";
-
         case NODE_SEQ: {
-            return generate_code_main(tree->data.seq.first) + generate_code_main(tree->data.seq.second);
+            return generate_code_main(tree->data.seq.first, in_for_header) + generate_code_main(tree->data.seq.second, in_for_header);
         }
-
         case NODE_DECL: {
             std::string tipo = tree->data.decl.tipo;
             std::string nombre = tree->data.decl.nombre;
-            return tipo + " " + nombre + ";\n";
+            // Solo poner ; si NO estamos dentro de header de for
+            return tipo + " " + nombre + (in_for_header ? "" : ";\n");
         }
-
         case NODE_ASSIGN: {
             std::string var = tree->data.bin.left->data.id;
-            std::string expr = generate_code_main(tree->data.bin.right);
-            return var + " = " + expr + ";\n";
+            std::string expr = generate_code_main(tree->data.bin.right, in_for_header);
+            return var + " = " + expr + (in_for_header ? "" : ";\n");
         }
-
         case NODE_PRINT: {
-            return generate_print_expr(tree->data.bin.left);
+            // Cambiar para que no incluya endl y ; en for header
+            if (in_for_header) {
+                return ""; // no se espera print en header for
+            } else {
+                return generate_print_expr(tree->data.bin.left);
+            }
         }
-
         case NODE_INPUT: {
             std::string var = tree->data.input.variable->data.id;
             return "cin >> " + var + ";\n";
         }
-
         case NODE_INT: {
             return std::to_string(tree->data.intval);
         }
-
         case NODE_FLOAT: {
             return std::to_string(tree->data.floatval);
         }
-
         case NODE_STRING: {
             return "\"" + std::string(tree->data.strval) + "\"";
         }
-
         case NODE_ID: {
             return tree->data.id;
         }
-
         case NODE_BINOP: {
-            std::string lhs = generate_code_main(tree->data.bin.left);
-            std::string rhs = generate_code_main(tree->data.bin.right);
+            std::string lhs = generate_code_main(tree->data.bin.left, in_for_header);
+            std::string rhs = generate_code_main(tree->data.bin.right, in_for_header);
             std::string op;
-
             switch (tree->op) {
                 case OP_PLUS: op = "+"; break;
                 case OP_MINUS: op = "-"; break;
@@ -716,10 +708,8 @@ std::string generate_code_main(AST* tree) {
                 case OP_GEQ: op = ">="; break;
                 default: op = "/* unknown */";
             }
-
             return "(" + lhs + " " + op + " " + rhs + ")";
         }
-
         case NODE_IF: {
             std::string cond = generate_code_main(tree->data.ctrl.cond);
             std::string then_branch = generate_code_main(tree->data.ctrl.then_branch);
@@ -729,13 +719,11 @@ std::string generate_code_main(AST* tree) {
                 code += "else {\n" + else_branch + "}\n";
             return code;
         }
-
         case NODE_WHILE: {
             std::string cond = generate_code_main(tree->data.ctrl.cond);
             std::string body = generate_code_main(tree->data.ctrl.then_branch);
             return "while (" + cond + ") {\n" + body + "}\n";
         }
-
         case NODE_FUNC_CALL: {
             std::string nombre = tree->data.func_call.name;
             std::string args_code = "";
@@ -745,26 +733,67 @@ std::string generate_code_main(AST* tree) {
                     args_code += generate_code_main(tree->data.func_call.args->data.args.values->at(i));
                 }
             }
-            return nombre + "(" + args_code + ");\n"; // Aquí el ";" pegado para evitar error
+            return nombre + "(" + args_code + ")" + ";\n";
         }
-
         case NODE_RETURN: {
             std::string expr = generate_code_main(tree->data.ret.expr);
             return "return " + expr + ";\n";
         }
-
         case NODE_FOR: {
-            std::string init = generate_code_main(tree->data.for_loop.init);
-            if (!init.empty() && init.back() == ';') init.pop_back();
+            std::string var_name = "i";  // Forzamos que sea i para que coincida con cond/post
 
-            std::string cond = generate_code_main(tree->data.for_loop.cond);
+            std::string init = generate_code_main(tree->data.for_loop.init, true);
+            std::string cond = generate_code_main(tree->data.for_loop.cond, true);
+            std::string post = generate_code_main(tree->data.for_loop.update, true);
 
-            std::string post = generate_code_main(tree->data.for_loop.update);
-            if (!post.empty() && post.back() == ';') post.pop_back();
+            // Ahora reemplazamos el nombre original en init (posiblemente ii) por var_name ("i")
+            // Por ejemplo, si init es "int ii = 0" lo cambiamos a "int i = 0"
+            auto replace_init_var = [&](std::string& str, const std::string& new_var) {
+                // Encontrar el nombre actual (después de "int ") y reemplazarlo por new_var
+                size_t pos = str.find("int ");
+                if (pos != std::string::npos) {
+                    pos += 4; // pos al inicio del nombre variable
+                    size_t end_pos = str.find_first_of("= ;", pos);
+                    if (end_pos != std::string::npos) {
+                        str.replace(pos, end_pos - pos, new_var);
+                    }
+                }
+            };
+
+            replace_init_var(init, var_name);
+
+            // Reemplazamos "i" en cond y post por var_name (por si acaso)
+            auto replace_var = [&](std::string& str, const std::string& from, const std::string& to) {
+                size_t pos = 0;
+                while ((pos = str.find(from, pos)) != std::string::npos) {
+                    // Verificar que sea palabra completa, como antes
+                    bool valid = true;
+                    if (pos > 0) {
+                        char before = str[pos - 1];
+                        if ((before >= 'a' && before <= 'z') || (before >= 'A' && before <= 'Z') || (before >= '0' && before <= '9') || before == '_')
+                            valid = false;
+                    }
+                    if (pos + from.size() < str.size()) {
+                        char after = str[pos + from.size()];
+                        if ((after >= 'a' && after <= 'z') || (after >= 'A' && after <= 'Z') || (after >= '0' && after <= '9') || after == '_')
+                            valid = false;
+                    }
+                    if (valid) {
+                        str.replace(pos, from.size(), to);
+                        pos += to.size();
+                    } else {
+                        pos += from.size();
+                    }
+                }
+            };
+
+            replace_var(cond, "i", var_name);
+            replace_var(post, "i", var_name);
 
             std::string body = generate_code_main(tree->data.for_loop.body);
             return "for (" + init + "; " + cond + "; " + post + ") {\n" + body + "}\n";
         }
+
 
         default:
             return "/* Nodo no implementado */\n";
@@ -785,14 +814,11 @@ void gen_print_parts(AST* node, std::string& codigo) {
 std::string generate_print_expr(AST* expr) {
     if (!expr) return "";
 
-    std::string codigo = "cout";
-
     if (expr->type == NODE_BINOP && expr->op == OP_PLUS) {
+        std::string codigo = "cout";
         gen_print_parts(expr, codigo);
+        return codigo + ";\n";
     } else {
-        codigo += " << " + generate_code_main(expr);
+        return "cout << " + generate_code_main(expr) + ";\n";
     }
-
-    codigo += " << endl;\n";
-    return codigo;
 }

@@ -1,40 +1,36 @@
-// Definición de función que duplica un número
-pega duplicar(x) {
-    devuelve_la_wa x * 2;
-}
-
-// Definición de función que imprime si un número es par o impar
-pega es_par(n) {
-    si_po (n * 2 == 0) {
-        imprime_la_wa("Es par");
+// Definir función para calcular el factorial de un número
+pega factorial(n) {
+    si_po (n == 0) {
+        devuelve_la_wa 1;
     } si_no {
-        imprime_la_wa("Es impar");
+        devuelve_la_wa 0;
     }
 }
 
 // Programa principal
-int a;
-float b;
-string saludo;
+int numero;
+int resultado;
+string mensaje;
 
-a = 10;
-b = 3.14;
-saludo = "Hola Mundo";
+imprime_la_wa("Ingrese un número para calcular su factorial:");
+lee numero;
 
-imprime_la_wa(saludo);
+resultado = factorial(numero);
 
-lee a;
-
-imprime_la_wa("El doble es: " + duplicar(a));
-es_par(a);
-
-mientras_la_wa (a > 0) {
-    imprime_la_wa(a);
-    a = a - 1;
+si_po (resultado > 1000) {
+    mensaje = "El factorial es muy grande";
+} si_no {
+    mensaje = "El factorial es: ";
 }
+
+imprime_la_wa(mensaje);
+imprime_la_wa(resultado);
 
 pa_cada (int i = 0; i < 5; i = i + 1) {
-    imprime_la_wa(i);
+    imprime_la_wa("Contador: " + i);
 }
 
-
+mientras_la_wa (numero > 0) {
+    imprime_la_wa(numero);
+    numero = numero - 1;
+}
