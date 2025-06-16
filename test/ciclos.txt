@@ -1,0 +1,11 @@
+suelta_la_wa("Ciclo for desde 0 hasta 4: ");
+pa_cada (numerito i = 0; i < 5; i = i + 1) {
+    suelta_la_wa i;
+}
+
+suelta_la_wa("Ciclo while desde 0 hasta 2: ");
+numerito j = 0;
+mientras_la_wa (j < 3) {
+    suelta_la_wa j;
+    j = j + 1;
+}

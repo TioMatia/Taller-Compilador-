@@ -226,7 +226,7 @@ int main(int argc, char** argv) {
         std::ofstream out("cpp_chileno.cpp");
         out << codigo_cpp;
         out.close();
-        std::cout << "Archivo generado: generado.cpp\n";
+        std::cout << "Archivo generado: cpp_chileno.cpp\n";
 
     } else {
         std::cerr << "Error durante el parseo.\n";

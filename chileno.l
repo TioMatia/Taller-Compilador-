@@ -7,20 +7,20 @@
 %%
 
 "si_po"                return IF;
-"si_no"                return ELSE;
+"si_no_po"             return ELSE;
 "mientras_la_wa"       return WHILE;
 "pa_cada"              return FOR;
-"imprime_la_wa"        return PRINT;
-"pega"                 return FUNCTION;
+"suelta_la_wa"         return PRINT;
+"hace_la_pega"         return FUNCTION;
 "devuelve_la_wa"       return RETURN;
-"=="                   return EQ;
-"!="                   return NEQ;
-"<="                   return LEQ;
-">="                   return GEQ;
+"igualito"             return EQ;
+"igualitont"           return NEQ;
+"igualitito"           return LEQ;
+"igualitote"           return GEQ;
 "numerito"             return TIPO_INT;
-"float"                return TIPO_FLOAT;
-"string"               return TIPO_STRING;
-"lee"                  return LEE;
+"numerito_con_punto"   return TIPO_FLOAT;
+"palabrita"            return TIPO_STRING;
+"lee_la_wa"            return LEE;
 [0-9]+\.[0-9]+          { yylval.floatval = atof(yytext); return FLOAT; }     // Flotantes
 [0-9]+                  { yylval.intval = atoi(yytext); return NUM; }         // Enteros
 \"([^\"\\]|\\.)*\"      {

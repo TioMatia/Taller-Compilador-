@@ -1,0 +1,29 @@
+suelta_la_wa "Escribe tu nombre: ";
+palabrita nombre;
+lee_la_wa nombre;
+suelta_la_wa "Hola, "+ nombre;
+
+
+hace_la_pega factorial(n) {
+    si_po (n igualito 0) {
+        devuelve_la_wa 1;
+    } si_no_po {
+        devuelve_la_wa n * factorial(n - 1);
+    }
+}
+
+suelta_la_wa("Ciclo for (0-2): ");
+pa_cada (numerito i = 0; i < 3; i = i + 1) {
+    si_po (i igualito 2) {
+        suelta_la_wa "Estamos en el ultimo ciclo: "+ i;
+        
+    } si_no_po {
+        suelta_la_wa i;
+    }
+}
+
+numerito f = factorial(4);
+suelta_la_wa "Factorial de 4 es:";
+suelta_la_wa f;
+
+

@@ -1,0 +1,11 @@
+hace_la_pega factorial(n) {
+    si_po (n igualito 0) {
+        devuelve_la_wa 1;
+    } si_no_po {
+        devuelve_la_wa n * factorial(n - 1);
+    }
+}
+
+numerito resultado = factorial(5);
+suelta_la_wa ("Factorial de 5: ");
+suelta_la_wa resultado;

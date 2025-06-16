@@ -1,0 +1,5 @@
+palabrita nombre;
+suelta_la_wa("Escribe tu nombre: ");
+lee_la_wa nombre;
+suelta_la_wa "Hola, "+ nombre;
+

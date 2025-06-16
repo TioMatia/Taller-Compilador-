@@ -1,0 +1,15 @@
+numerito x = 10;
+
+si_po (x igualito 10) {
+    suelta_la_wa ("x es diez");
+} si_no_po {
+    suelta_la_wa ("x no es diez");
+}
+
+numerito y = 8;
+
+si_po (y igualitito 10) {
+    suelta_la_wa ("y es menor o igual a 10");
+} si_no_po {
+    suelta_la_wa ("y no es menor o igual a 10");
+}
