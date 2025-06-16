@@ -7,12 +7,14 @@ if ((n == 0)) {
 return 1;
 }
 else {
-return 0;
+return (n * factorial((n - 1));
+);
 }
 }
 
 int main() {
 int numero;
+numero = 0;
 int resultado;
 string mensaje;
 cout << "Ingrese un número para calcular su factorial:";

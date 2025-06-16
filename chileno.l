@@ -17,7 +17,7 @@
 "!="                   return NEQ;
 "<="                   return LEQ;
 ">="                   return GEQ;
-"int"                  return TIPO_INT;
+"numerito"             return TIPO_INT;
 "float"                return TIPO_FLOAT;
 "string"               return TIPO_STRING;
 "lee"                  return LEE;

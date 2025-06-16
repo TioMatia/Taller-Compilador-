@@ -3,12 +3,12 @@ pega factorial(n) {
     si_po (n == 0) {
         devuelve_la_wa 1;
     } si_no {
-        devuelve_la_wa 0;
+        devuelve_la_wa n * factorial(n - 1);
     }
 }
 
 // Programa principal
-int numero;
+int numero = 0;
 int resultado;
 string mensaje;
 

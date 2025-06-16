@@ -224,15 +224,15 @@ Value eval_ast(AST* tree) {
             Value val = eval_ast(tree->data.bin.right);
             std::string tipo = variables[var].tipo;
 
-            // Validar que el tipo del valor que asignamos coincide con el tipo declarado
+          
             if ((tipo == "int" && val.type != Value::INT) ||
-                (tipo == "float" && val.type != Value::FLOAT && val.type != Value::INT) || // aceptar int en float
+                (tipo == "float" && val.type != Value::FLOAT && val.type != Value::INT) || 
                 (tipo == "string" && val.type != Value::STRING)) {
                 std::cerr << "Error: tipo incompatible en asignacion a variable '" << var << "'\n";
                 exit(1);
             }
 
-            // Para float, si es int lo convertimos a float
+           
             if (tipo == "float" && val.type == Value::INT) {
                 variables[var].valor = Value(static_cast<float>(val.asInt()));
             } else {
@@ -453,7 +453,7 @@ Value eval_ast(AST* tree) {
                     if (val.type == Value::INT) varinfo.tipo = "int";
                     else if (val.type == Value::FLOAT) varinfo.tipo = "float";
                     else if (val.type == Value::STRING) varinfo.tipo = "string";
-                    else varinfo.tipo = "unknown"; // o "" para manejar
+                    else varinfo.tipo = "unknown"; 
 
                     varinfo.valor = val;
                     variables[param_names[i]] = varinfo;
@@ -601,16 +601,16 @@ void print_ast(AST* tree, int indent) {
 std::string generar_programa(AST* tree) {
     std::string codigo = "#include <iostream>\n#include <string>\nusing namespace std;\n\n";
 
-    // Generar funciones fuera del main
+    // Genera funciones fuera del main
     codigo += generate_code_funcs(tree);
 
-    // Abrir main
+    // Abre el main
     codigo += "int main() {\n";
 
-    // Generar código que no sean funciones dentro del main
+    // Genera codigo que no sean funciones dentro del main
     codigo += generate_code_main(tree);
 
-    // Cerrar main
+    // Cierra el main
     codigo += "return 0;\n}\n";
 
     return codigo;
@@ -641,7 +641,7 @@ std::string generate_code_funcs(AST* tree) {
             break;
         }
         default:
-            // No es función, no genera nada aquí
+            
             break;
     }
     return codigo;
@@ -659,7 +659,7 @@ std::string generate_code_main(AST* tree, bool in_for_header) {
         case NODE_DECL: {
             std::string tipo = tree->data.decl.tipo;
             std::string nombre = tree->data.decl.nombre;
-            // Solo poner ; si NO estamos dentro de header de for
+            
             return tipo + " " + nombre + (in_for_header ? "" : ";\n");
         }
         case NODE_ASSIGN: {
@@ -668,9 +668,9 @@ std::string generate_code_main(AST* tree, bool in_for_header) {
             return var + " = " + expr + (in_for_header ? "" : ";\n");
         }
         case NODE_PRINT: {
-            // Cambiar para que no incluya endl y ; en for header
+            
             if (in_for_header) {
-                return ""; // no se espera print en header for
+                return ""; 
             } else {
                 return generate_print_expr(tree->data.bin.left);
             }
@@ -740,19 +740,17 @@ std::string generate_code_main(AST* tree, bool in_for_header) {
             return "return " + expr + ";\n";
         }
         case NODE_FOR: {
-            std::string var_name = "i";  // Forzamos que sea i para que coincida con cond/post
+            std::string var_name = "i";  
 
             std::string init = generate_code_main(tree->data.for_loop.init, true);
             std::string cond = generate_code_main(tree->data.for_loop.cond, true);
             std::string post = generate_code_main(tree->data.for_loop.update, true);
 
-            // Ahora reemplazamos el nombre original en init (posiblemente ii) por var_name ("i")
-            // Por ejemplo, si init es "int ii = 0" lo cambiamos a "int i = 0"
             auto replace_init_var = [&](std::string& str, const std::string& new_var) {
-                // Encontrar el nombre actual (después de "int ") y reemplazarlo por new_var
+                
                 size_t pos = str.find("int ");
                 if (pos != std::string::npos) {
-                    pos += 4; // pos al inicio del nombre variable
+                    pos += 4; 
                     size_t end_pos = str.find_first_of("= ;", pos);
                     if (end_pos != std::string::npos) {
                         str.replace(pos, end_pos - pos, new_var);
@@ -762,11 +760,11 @@ std::string generate_code_main(AST* tree, bool in_for_header) {
 
             replace_init_var(init, var_name);
 
-            // Reemplazamos "i" en cond y post por var_name (por si acaso)
+            
             auto replace_var = [&](std::string& str, const std::string& from, const std::string& to) {
                 size_t pos = 0;
                 while ((pos = str.find(from, pos)) != std::string::npos) {
-                    // Verificar que sea palabra completa, como antes
+                   
                     bool valid = true;
                     if (pos > 0) {
                         char before = str[pos - 1];

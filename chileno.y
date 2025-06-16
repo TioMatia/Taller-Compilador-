@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
         print_ast(tree, 0);
 
         std::cout << "\n--- Ejecucion del programa ---\n";
-        eval_ast(tree); // Ejecuta como siempre
+        eval_ast(tree); 
 
         
         std::cout << "\n--- Generando codigo C++ ---\n";

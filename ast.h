@@ -140,12 +140,12 @@ AST* make_for(AST* init, AST* cond, AST* update, AST* body);
 AST* make_decl(const char* tipo, const char* nombre);
 AST* make_input(AST* variable); 
 
-// Funciones existentes
+//funciones para imprimir y evaluar el arbol
 void print_ast(AST* tree, int indent = 0);
 Value eval_ast(AST* tree);
 
-// Nuevas funciones para generación de código
-std::string generar_programa(AST* tree);          // Genera el archivo completo (void, escribe archivo)
+// funciones para generación de código
+std::string generar_programa(AST* tree);         
 std::string generate_code_funcs(AST* tree);
 std::string generate_print_expr(AST* expr);
 std::string generate_code_main(AST* tree, bool in_for_header = false);
