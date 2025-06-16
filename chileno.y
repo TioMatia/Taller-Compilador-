@@ -12,11 +12,14 @@
 #include <string>
 #include <map>
 #include "ast.h"
+#include <fstream>
 
 extern int yylex();
 void yyerror(const char* s) { std::cerr << "Error: " << s << std::endl; exit(1); }
 extern FILE* yyin;
 AST* tree;
+
+std::string generar_programa(AST* root);
 
 std::map<std::string, bool> tabla_simbolos;  // Guarda variables declaradas
 %}
@@ -213,8 +216,18 @@ int main(int argc, char** argv) {
     if (yyparse() == 0) {
         std::cout << "--- Arbol de sintaxis generado ---\n";
         print_ast(tree, 0);
+
         std::cout << "\n--- Ejecucion del programa ---\n";
-        eval_ast(tree);
+        eval_ast(tree); // Ejecuta como siempre
+
+        
+        std::cout << "\n--- Generando codigo C++ ---\n";
+        std::string codigo_cpp = generar_programa(tree);
+        std::ofstream out("cpp_chileno.cpp");
+        out << codigo_cpp;
+        out.close();
+        std::cout << "Archivo generado: generado.cpp\n";
+
     } else {
         std::cerr << "Error durante el parseo.\n";
         return 1;

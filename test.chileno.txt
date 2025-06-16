@@ -1,4 +1,40 @@
-int edad;
-imprime_la_wa("Escribe tu edad: ");
-lee edad;
-imprime_la_wa("Tu edad es: "+ edad);
+// Definición de función que duplica un número
+pega duplicar(x) {
+    devuelve_la_wa x * 2;
+}
+
+// Definición de función que imprime si un número es par o impar
+pega es_par(n) {
+    si_po (n * 2 == 0) {
+        imprime_la_wa("Es par");
+    } si_no {
+        imprime_la_wa("Es impar");
+    }
+}
+
+// Programa principal
+int a;
+float b;
+string saludo;
+
+a = 10;
+b = 3.14;
+saludo = "Hola Mundo";
+
+imprime_la_wa(saludo);
+
+lee a;
+
+imprime_la_wa("El doble es: " + duplicar(a));
+es_par(a);
+
+mientras_la_wa (a > 0) {
+    imprime_la_wa(a);
+    a = a - 1;
+}
+
+pa_cada (int i = 0; i < 5; i = i + 1) {
+    imprime_la_wa(i);
+}
+
+

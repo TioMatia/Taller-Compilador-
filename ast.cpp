@@ -597,3 +597,202 @@ void print_ast(AST* tree, int indent) {
             std::cout << "Nodo desconocido\n";
     }
 }
+std::string generate_code_funcs(AST* tree);
+std::string generate_code_main(AST* tree);
+std::string generate_print_expr(AST* expr);
+
+std::string generar_programa(AST* tree) {
+    std::string codigo = "#include <iostream>\n#include <string>\nusing namespace std;\n\n";
+
+    // Generar funciones fuera del main
+    codigo += generate_code_funcs(tree);
+
+    // Abrir main
+    codigo += "int main() {\n";
+
+    // Generar código que no sean funciones dentro del main
+    codigo += generate_code_main(tree);
+
+    // Cerrar main
+    codigo += "return 0;\n}\n";
+
+    return codigo;
+}
+
+std::string generate_code_funcs(AST* tree) {
+    if (!tree) return "";
+
+    std::string codigo;
+
+    switch (tree->type) {
+        case NODE_FUNC_DEF: {
+            std::string nombre = tree->data.func_def.name;
+            std::string params_code = ""; 
+            if (tree->data.func_def.params) {
+                for (size_t i = 0; i < tree->data.func_def.params->data.params.names->size(); i++) {
+                    if (i > 0) params_code += ", ";
+                    params_code += "auto " + tree->data.func_def.params->data.params.names->at(i);
+                }
+            }
+            std::string body_code = generate_code_main(tree->data.func_def.body);
+            codigo += "auto " + nombre + "(" + params_code + ") {\n" + body_code + "}\n\n";
+            break;
+        }
+        case NODE_SEQ: {
+            codigo += generate_code_funcs(tree->data.seq.first);
+            codigo += generate_code_funcs(tree->data.seq.second);
+            break;
+        }
+        default:
+            // No es función, no genera nada aquí
+            break;
+    }
+    return codigo;
+}
+
+std::string generate_code_main(AST* tree) {
+    if (!tree) return "";
+
+    switch (tree->type) {
+        case NODE_FUNC_DEF:
+            return "";
+
+        case NODE_SEQ: {
+            return generate_code_main(tree->data.seq.first) + generate_code_main(tree->data.seq.second);
+        }
+
+        case NODE_DECL: {
+            std::string tipo = tree->data.decl.tipo;
+            std::string nombre = tree->data.decl.nombre;
+            return tipo + " " + nombre + ";\n";
+        }
+
+        case NODE_ASSIGN: {
+            std::string var = tree->data.bin.left->data.id;
+            std::string expr = generate_code_main(tree->data.bin.right);
+            return var + " = " + expr + ";\n";
+        }
+
+        case NODE_PRINT: {
+            return generate_print_expr(tree->data.bin.left);
+        }
+
+        case NODE_INPUT: {
+            std::string var = tree->data.input.variable->data.id;
+            return "cin >> " + var + ";\n";
+        }
+
+        case NODE_INT: {
+            return std::to_string(tree->data.intval);
+        }
+
+        case NODE_FLOAT: {
+            return std::to_string(tree->data.floatval);
+        }
+
+        case NODE_STRING: {
+            return "\"" + std::string(tree->data.strval) + "\"";
+        }
+
+        case NODE_ID: {
+            return tree->data.id;
+        }
+
+        case NODE_BINOP: {
+            std::string lhs = generate_code_main(tree->data.bin.left);
+            std::string rhs = generate_code_main(tree->data.bin.right);
+            std::string op;
+
+            switch (tree->op) {
+                case OP_PLUS: op = "+"; break;
+                case OP_MINUS: op = "-"; break;
+                case OP_MULT: op = "*"; break;
+                case OP_DIV: op = "/"; break;
+                case OP_EQ: op = "=="; break;
+                case OP_NEQ: op = "!="; break;
+                case OP_LT: op = "<"; break;
+                case OP_LEQ: op = "<="; break;
+                case OP_GT: op = ">"; break;
+                case OP_GEQ: op = ">="; break;
+                default: op = "/* unknown */";
+            }
+
+            return "(" + lhs + " " + op + " " + rhs + ")";
+        }
+
+        case NODE_IF: {
+            std::string cond = generate_code_main(tree->data.ctrl.cond);
+            std::string then_branch = generate_code_main(tree->data.ctrl.then_branch);
+            std::string else_branch = tree->data.ctrl.else_branch ? generate_code_main(tree->data.ctrl.else_branch) : "";
+            std::string code = "if (" + cond + ") {\n" + then_branch + "}\n";
+            if (!else_branch.empty())
+                code += "else {\n" + else_branch + "}\n";
+            return code;
+        }
+
+        case NODE_WHILE: {
+            std::string cond = generate_code_main(tree->data.ctrl.cond);
+            std::string body = generate_code_main(tree->data.ctrl.then_branch);
+            return "while (" + cond + ") {\n" + body + "}\n";
+        }
+
+        case NODE_FUNC_CALL: {
+            std::string nombre = tree->data.func_call.name;
+            std::string args_code = "";
+            if (tree->data.func_call.args) {
+                for (size_t i = 0; i < tree->data.func_call.args->data.args.values->size(); i++) {
+                    if (i > 0) args_code += ", ";
+                    args_code += generate_code_main(tree->data.func_call.args->data.args.values->at(i));
+                }
+            }
+            return nombre + "(" + args_code + ");\n"; // Aquí el ";" pegado para evitar error
+        }
+
+        case NODE_RETURN: {
+            std::string expr = generate_code_main(tree->data.ret.expr);
+            return "return " + expr + ";\n";
+        }
+
+        case NODE_FOR: {
+            std::string init = generate_code_main(tree->data.for_loop.init);
+            if (!init.empty() && init.back() == ';') init.pop_back();
+
+            std::string cond = generate_code_main(tree->data.for_loop.cond);
+
+            std::string post = generate_code_main(tree->data.for_loop.update);
+            if (!post.empty() && post.back() == ';') post.pop_back();
+
+            std::string body = generate_code_main(tree->data.for_loop.body);
+            return "for (" + init + "; " + cond + "; " + post + ") {\n" + body + "}\n";
+        }
+
+        default:
+            return "/* Nodo no implementado */\n";
+    }
+}
+
+void gen_print_parts(AST* node, std::string& codigo) {
+    if (!node) return;
+
+    if (node->type == NODE_BINOP && node->op == OP_PLUS) {
+        gen_print_parts(node->data.bin.left, codigo);
+        gen_print_parts(node->data.bin.right, codigo);
+    } else {
+        codigo += " << " + generate_code_main(node);
+    }
+}
+
+std::string generate_print_expr(AST* expr) {
+    if (!expr) return "";
+
+    std::string codigo = "cout";
+
+    if (expr->type == NODE_BINOP && expr->op == OP_PLUS) {
+        gen_print_parts(expr, codigo);
+    } else {
+        codigo += " << " + generate_code_main(expr);
+    }
+
+    codigo += " << endl;\n";
+    return codigo;
+}

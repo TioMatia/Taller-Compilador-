@@ -116,12 +116,11 @@ struct AST {
         } decl;
 
         struct {
-            AST* variable; // <-- para input, a que variable asignar
+            AST* variable; 
         } input;
     } data;
 };
 
-// Funciones constructoras
 AST* make_int(int val);
 AST* make_float(float val);
 AST* make_string(const char* val);
@@ -141,7 +140,14 @@ AST* make_for(AST* init, AST* cond, AST* update, AST* body);
 AST* make_decl(const char* tipo, const char* nombre);
 AST* make_input(AST* variable); 
 
+// Funciones existentes
 void print_ast(AST* tree, int indent = 0);
 Value eval_ast(AST* tree);
+
+// Nuevas funciones para generación de código
+std::string generar_programa(AST* tree);          // Genera el archivo completo (void, escribe archivo)
+std::string generate_code(AST* tree);        // Genera el cuerpo del programa en string
+std::string generate_header();                // Genera encabezado .cpp (includes, main, etc)
+std::string generate_footer();                // Genera footer (cierre de main y archivo)
 
 #endif
