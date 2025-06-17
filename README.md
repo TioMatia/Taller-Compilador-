@@ -144,21 +144,21 @@ Una vez obtenido el repositorio.
 #### 4- Compila el parser, el scanner y el archivo que define y maneja el AST. 
 ```g++ chileno.tab.cpp lex.yy.c ast.cpp -o chileno_compilador```
 
-### 5- Ejecutar
+#### 5- Ejecutar
 Ejecuta el comando requerido para el test de prueba.
-#### Test ciclos
+##### Test ciclos
 ```./chileno_compilador test/ciclos.txt```
-#### Test condicionales
+##### Test condicionales
 ```./chileno_compilador test/condicionales.txt```
-#### Test funciones
+##### Test funciones
 ```./chileno_compilador test/funciones.txt```
-#### Test ciclos
+##### Test ciclos
 ```./chileno_compilador test/input.txt```
-#### Test completo
+##### Test completo
 ```./chileno_compilador test/completo.txt```
-### Ejercicio Profesor
+##### Ejercicio Profesor
 ```./chileno_compilador ejercicio_profesor/ejercicio.txt```
-### ¿Qué muestra por pantalla?
+#### ¿Qué muestra por pantalla?
 ```
 Primero imprime el arbol de sintaxis abstracta.
 Luego imprime lo que ejecuta el programa.
@@ -210,11 +210,11 @@ Hola Matias
 Archivo generado: cpp_chileno.cpp
 ```
 
-### Compilar archivo generado C++
+#### Compilar archivo generado C++
 ```
 g++ cpp_chileno.cpp -o cpp_chileno.exe
 ```
-### Ejecutar archivo generado C++
+#### Ejecutar archivo generado C++
 ```
 ./cpp_chileno
 ```
