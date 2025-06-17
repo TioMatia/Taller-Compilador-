@@ -152,6 +152,8 @@ Ejecuta el comando requerido para el test ha probar.
 ```./chileno_compilador test/input.txt```
 #### Test completo
 ```./chileno_compilador test/completo.txt```
+### Ejercicio Profesor
+```./chileno_compilador ejercicio_profesor/ejercicio.txt```
 ### ¿Que muestra por pantalla?
 ```
 Primero imprime el arbol de sintaxis abstracta.
@@ -203,3 +205,13 @@ Hola Matias
 --- Generando codigo C++ ---
 Archivo generado: cpp_chileno.cpp
 ```
+
+### Compilar archivo generado C++
+```
+g++ cpp_chileno.cpp -o cpp_chileno.exe
+```
+### Ejecutar archivo generado C++
+```
+./cpp_chileno
+```
+## Disfruta y divierte programando en Chileno!!😉
