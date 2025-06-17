@@ -135,13 +135,17 @@ suelta_la_wa nombre;
 ## Manual 📖
 Una vez obtenido el repositorio.
 ### Compilar
+#### 1- Ejecuta el generador de análisis sintáctico:
 ```bison -d chileno.y```
+#### 2-Renombra el archivo “chileno.tab.c” a “chileno.tab.cpp” para que sea código C + +:
 ```mv chileno.tab.c chileno.tab.cpp```
+#### 3- Le pasamos chileno.l a flex (el generador de analisis lexico):
 ```flex chileno.l```
+#### 4- Compila el parser, el scanner y el archivo que define y maneja el AST. 
 ```g++ chileno.tab.cpp lex.yy.c ast.cpp -o chileno_compilador```
 
-### Ejecutar
-Ejecuta el comando requerido para el test ha probar.
+### 5- Ejecutar
+Ejecuta el comando requerido para el test de prueba.
 #### Test ciclos
 ```./chileno_compilador test/ciclos.txt```
 #### Test condicionales
@@ -154,7 +158,7 @@ Ejecuta el comando requerido para el test ha probar.
 ```./chileno_compilador test/completo.txt```
 ### Ejercicio Profesor
 ```./chileno_compilador ejercicio_profesor/ejercicio.txt```
-### ¿Que muestra por pantalla?
+### ¿Qué muestra por pantalla?
 ```
 Primero imprime el arbol de sintaxis abstracta.
 Luego imprime lo que ejecuta el programa.
